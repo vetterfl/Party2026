@@ -1,0 +1,26 @@
+{{template "_head_admin" .}}
+<body>
+<div class="admin-layout">
+{{template "_admin_topbar" .}}
+<main class="admin-main">
+
+  <div class="page-header">
+    <h1 class="page-title">Content Blocks</h1>
+    <p class="page-subtitle" style="color:var(--text-muted);font-size:0.8rem">Edit text shown on the guest invite page. Markdown supported.</p>
+  </div>
+
+  <div class="block-list">
+    {{range .Blocks}}
+    <div class="block-row">
+      <span class="block-key">{{.Key}}</span>
+      <span class="block-label">{{.Label}}</span>
+      <span class="block-preview">{{if .BodyDE}}{{.BodyDE}}{{else}}<em style="color:var(--text-dim)">empty</em>{{end}}</span>
+      <a href="/admin/content/{{.Key}}" class="btn btn-outline btn-sm">Edit</a>
+    </div>
+    {{end}}
+  </div>
+
+</main>
+</div>
+</body>
+</html>

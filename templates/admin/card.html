@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invite — {{.Guest.Name}}</title>
+  <style>
+    @font-face {
+      font-family: 'Space Grotesk';
+      font-weight: 300; font-style: normal;
+      src: url('/assets/fonts/space-grotesk-latin-300-normal.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Space Grotesk';
+      font-weight: 400; font-style: normal;
+      src: url('/assets/fonts/space-grotesk-latin-400-normal.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Space Grotesk';
+      font-weight: 700; font-style: normal;
+      src: url('/assets/fonts/space-grotesk-latin-700-normal.woff2') format('woff2');
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    .print-hint {
+      font-size: 0.8rem;
+      color: #888;
+      text-align: center;
+    }
+    .print-hint button {
+      font-family: inherit;
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1.25rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      display: block;
+      margin: 0.5rem auto 0;
+    }
+
+    /* The ticket */
+    .ticket {
+      width: 148mm;   /* A6 landscape */
+      height: 105mm;
+      display: flex;
+      background: #050d1a;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    /* Left panel — main info */
+    .ticket-left {
+      flex: 1;
+      padding: 8mm 8mm 8mm 10mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background pool glow */
+    .ticket-left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 80%, rgba(0, 212, 170, 0.15), transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 10%, rgba(58, 123, 213, 0.12), transparent 55%);
+      pointer-events: none;
+    }
+
+    .ticket-event-name {
+      font-size: 7pt;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #00d4aa;
+    }
+
+    .ticket-year {
+      font-size: 6pt;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.3);
+      margin-top: 2pt;
+    }
+
+    .ticket-guest-name {
+      font-size: 22pt;
+      font-weight: 300;
+      color: #e8f4f8;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin: auto 0;
+    }
+
+    .ticket-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2pt;
+    }
+
+    .ticket-detail-row {
+      display: flex;
+      gap: 8pt;
+      align-items: baseline;
+    }
+
+    .ticket-detail-label {
+      font-size: 5.5pt;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      min-width: 30pt;
+    }
+
+    .ticket-detail-value {
+      font-size: 7pt;
+      font-weight: 600;
+      color: #e8f4f8;
+      letter-spacing: 0.05em;
+    }
+
+    .ticket-url {
+      font-size: 5.5pt;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em;
+      margin-top: 4pt;
+    }
+
+    /* Perforation line */
+    .ticket-perf {
+      width: 1px;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 4pt,
+        rgba(255,255,255,0.12) 4pt,
+        rgba(255,255,255,0.12) 6pt
+      );
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .ticket-perf::before,
+    .ticket-perf::after {
+      content: '';
+      position: absolute;
+      left: -8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f0f0f0;
+    }
+    .ticket-perf::before { top: -8px; }
+    .ticket-perf::after  { bottom: -8px; }
+
+    /* Right stub — QR + admit */
+    .ticket-stub {
+      width: 38mm;
+      padding: 6mm 7mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.04);
+      gap: 4pt;
+    }
+
+    .stub-label {
+      font-size: 5pt;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .stub-qr img {
+      width: 28mm;
+      height: 28mm;
+      display: block;
+      border-radius: 4px;
+    }
+
+    .stub-name {
+      font-size: 7pt;
+      font-weight: 600;
+      color: #e8f4f8;
+      text-align: center;
+      letter-spacing: 0.05em;
+      max-width: 30mm;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stub-admit {
+      font-size: 5pt;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #00d4aa;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+        min-height: auto;
+        display: block;
+      }
+      .print-hint { display: none; }
+      .ticket {
+        box-shadow: none;
+        margin: 0;
+        width: 148mm;
+        height: 105mm;
+        border-radius: 0;
+      }
+      .ticket-perf::before,
+      .ticket-perf::after {
+        background: white;
+      }
+      @page { size: A6 landscape; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="print-hint">
+    Invite card for <strong>{{.Guest.Name}}</strong><br>
+    Print at A6 landscape or 2-up on A4.
+    <button onclick="window.print()">Print</button>
+  </div>
+
+  <div class="ticket">
+    <div class="ticket-left">
+      <div>
+        <div class="ticket-event-name">{{index .Config "party_name_de"}}</div>
+        <div class="ticket-year">Summer {{index .Config "party_date" | printf "%.4s"}}</div>
+      </div>
+
+      <div class="ticket-guest-name">{{.Guest.Name}}</div>
+
+      <div class="ticket-details">
+        <div class="ticket-detail-row">
+          <span class="ticket-detail-label">Datum</span>
+          <span class="ticket-detail-value">{{index .Config "party_date"}}</span>
+        </div>
+        <div class="ticket-detail-row">
+          <span class="ticket-detail-label">Ab</span>
+          <span class="ticket-detail-value">{{index .Config "party_time_start"}} Uhr</span>
+        </div>
+        <div class="ticket-url">{{.URL}}</div>
+      </div>
+    </div>
+
+    <div class="ticket-perf"></div>
+
+    <div class="ticket-stub">
+      <span class="stub-label">Einlass</span>
+      <div class="stub-qr">
+        <img src="{{.QRPNG}}" alt="QR Code">
+      </div>
+      <span class="stub-name">{{.Guest.Name}}</span>
+      <span class="stub-admit">Admit One</span>
+    </div>
+  </div>
+
+</body>
+</html>

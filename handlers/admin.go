@@ -1,0 +1,259 @@
+package handlers
+
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/csv"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/skip2/go-qrcode"
+	"golang.org/x/crypto/bcrypt"
+	"party2026/middleware"
+	"party2026/models"
+)
+
+type AdminHandler struct {
+	guests  *models.GuestStore
+	config  *models.ConfigStore
+	content *models.ContentStore
+	mailer  *Mailer
+	baseURL string
+}
+
+func NewAdminHandler(g *models.GuestStore, cfg *models.ConfigStore, cnt *models.ContentStore, m *Mailer, baseURL string) *AdminHandler {
+	return &AdminHandler{guests: g, config: cfg, content: cnt, mailer: m, baseURL: baseURL}
+}
+
+// GET /admin/login
+func (h *AdminHandler) LoginPage(c echo.Context) error {
+	if middleware.IsAdminAuthed(c) {
+		return c.Redirect(http.StatusSeeOther, "/admin")
+	}
+	return c.Render(http.StatusOK, "login.html", map[string]interface{}{
+		"Error": false,
+	})
+}
+
+// POST /admin/login
+func (h *AdminHandler) LoginSubmit(c echo.Context) error {
+	user := c.FormValue("username")
+	pass := c.FormValue("password")
+
+	storedUser, _ := h.config.Get("admin_user")
+	storedHash, _ := h.config.Get("admin_password_hash")
+
+	if user != storedUser || bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(pass)) != nil {
+		return c.Render(http.StatusOK, "login.html", map[string]interface{}{
+			"Error": true,
+		})
+	}
+
+	_ = middleware.SetAdminAuthed(c)
+	return c.Redirect(http.StatusSeeOther, "/admin")
+}
+
+// GET /admin/logout
+func (h *AdminHandler) Logout(c echo.Context) error {
+	_ = middleware.ClearAdminSession(c)
+	return c.Redirect(http.StatusSeeOther, "/admin/login")
+}
+
+// GET /admin — dashboard
+func (h *AdminHandler) Dashboard(c echo.Context) error {
+	stats, err := h.guests.Stats()
+	if err != nil {
+		return err
+	}
+	cfg, err := h.config.All()
+	if err != nil {
+		return err
+	}
+
+	partyDate, _ := time.Parse("2006-01-02", cfg["party_date"])
+	daysUntil := int(time.Until(partyDate).Hours() / 24)
+
+	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
+		"Stats":     stats,
+		"DaysUntil": daysUntil,
+		"Config":    cfg,
+	})
+}
+
+// GET /admin/guests
+func (h *AdminHandler) GuestList(c echo.Context) error {
+	filter := c.QueryParam("status")
+	var guests []models.Guest
+	var err error
+	if filter != "" {
+		guests, err = h.guests.ByStatus(filter)
+	} else {
+		guests, err = h.guests.All()
+	}
+	if err != nil {
+		return err
+	}
+	cfg, _ := h.config.All()
+	return c.Render(http.StatusOK, "guests.html", map[string]interface{}{
+		"Guests":  guests,
+		"Filter":  filter,
+		"BaseURL": h.baseURL,
+		"Config":  cfg,
+	})
+}
+
+// POST /admin/guests — create
+func (h *AdminHandler) GuestCreate(c echo.Context) error {
+	name := strings.TrimSpace(c.FormValue("name"))
+	if name == "" {
+		return c.Redirect(http.StatusSeeOther, "/admin/guests")
+	}
+	_, err := h.guests.Create(name)
+	if err != nil {
+		return err
+	}
+	return c.Redirect(http.StatusSeeOther, "/admin/guests")
+}
+
+// GET /admin/guests/:id/edit
+func (h *AdminHandler) GuestEdit(c echo.Context) error {
+	g, err := h.guests.FindByID(c.Param("id"))
+	if err != nil {
+		return echo.ErrNotFound
+	}
+	return c.Render(http.StatusOK, "guest_edit.html", map[string]interface{}{
+		"Guest":   g,
+		"BaseURL": h.baseURL,
+	})
+}
+
+// POST /admin/guests/:id/edit
+func (h *AdminHandler) GuestUpdate(c echo.Context) error {
+	g, err := h.guests.FindByID(c.Param("id"))
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
+	g.Name = strings.TrimSpace(c.FormValue("name"))
+	g.Status = c.FormValue("status")
+
+	if email := strings.TrimSpace(c.FormValue("email")); email != "" {
+		g.Email = &email
+	} else {
+		g.Email = nil
+	}
+
+	g.PlusOne = c.FormValue("plus_one") == "1"
+	if pname := strings.TrimSpace(c.FormValue("plus_one_name")); pname != "" {
+		g.PlusOneName = &pname
+	} else {
+		g.PlusOneName = nil
+	}
+
+	children := 0
+	fmt.Sscanf(c.FormValue("children"), "%d", &children)
+	g.Children = children
+
+	if song := strings.TrimSpace(c.FormValue("song")); song != "" {
+		g.Song = &song
+	} else {
+		g.Song = nil
+	}
+
+	if err := h.guests.Update(g); err != nil {
+		return err
+	}
+	return c.Redirect(http.StatusSeeOther, "/admin/guests")
+}
+
+// POST /admin/guests/:id/delete
+func (h *AdminHandler) GuestDelete(c echo.Context) error {
+	if err := h.guests.Delete(c.Param("id")); err != nil {
+		return err
+	}
+	return c.Redirect(http.StatusSeeOther, "/admin/guests")
+}
+
+// GET /admin/guests/:id/qr — download QR PNG
+func (h *AdminHandler) GuestQR(c echo.Context) error {
+	g, err := h.guests.FindByID(c.Param("id"))
+	if err != nil {
+		return echo.ErrNotFound
+	}
+	url := h.baseURL + "/?spell=" + g.Code
+	png, err := qrcode.Encode(url, qrcode.Medium, 256)
+	if err != nil {
+		return err
+	}
+	c.Response().Header().Set("Content-Type", "image/png")
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="invite-%s.png"`, g.Code))
+	_, err = c.Response().Write(png)
+	return err
+}
+
+// GET /admin/guests/:id/card — printable concert ticket HTML
+func (h *AdminHandler) GuestCard(c echo.Context) error {
+	g, err := h.guests.FindByID(c.Param("id"))
+	if err != nil {
+		return echo.ErrNotFound
+	}
+	url := h.baseURL + "/?spell=" + g.Code
+	png, err := qrcode.Encode(url, qrcode.Medium, 200)
+	if err != nil {
+		return err
+	}
+	qrB64 := "data:image/png;base64," + base64.StdEncoding.EncodeToString(png)
+	cfg, _ := h.config.All()
+	return c.Render(http.StatusOK, "card.html", map[string]interface{}{
+		"Guest":  g,
+		"QRPNG":  qrB64,
+		"Config": cfg,
+		"URL":    h.baseURL,
+	})
+}
+
+// GET /admin/export/csv
+func (h *AdminHandler) ExportCSV(c echo.Context) error {
+	guests, err := h.guests.All()
+	if err != nil {
+		return err
+	}
+
+	var buf bytes.Buffer
+	w := csv.NewWriter(&buf)
+	_ = w.Write([]string{"Name", "Code", "Status", "Email", "Plus One", "Plus One Name", "Children", "Song", "Comment", "Newsletter", "RSVP At"})
+	for _, g := range guests {
+		rsvpAt := ""
+		if g.RSVPAt != nil {
+			rsvpAt = g.RSVPAt.Format(time.RFC3339)
+		}
+		_ = w.Write([]string{
+			g.Name, g.Code, g.Status,
+			derefStr(g.Email), boolStr(g.PlusOne), derefStr(g.PlusOneName),
+			fmt.Sprint(g.Children), derefStr(g.Song), derefStr(g.Comment),
+			boolStr(g.Newsletter), rsvpAt,
+		})
+	}
+	w.Flush()
+
+	c.Response().Header().Set("Content-Type", "text/csv")
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=guestlist.csv")
+	return c.String(http.StatusOK, buf.String())
+}
+
+func derefStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func boolStr(b bool) string {
+	if b {
+		return "yes"
+	}
+	return "no"
+}

@@ -1,0 +1,63 @@
+{{template "_head_guest" .}}
+<body>
+{{template "_pool_bg" .}}
+
+<div class="spell-page">
+  {{/* Language toggle — minimal, no nav logout on spell page */}}
+  <nav class="nav" style="position:fixed;top:0;right:0;padding:1.25rem 2rem;z-index:100;">
+    <div class="nav-lang">
+      <form method="POST" action="/lang" style="display:contents">
+        <input type="hidden" name="lang" value="de">
+        <button type="submit" class="lang-btn{{if eq .Base.Lang "de"}} active{{end}}">DE</button>
+      </form>
+      <form method="POST" action="/lang" style="display:contents">
+        <input type="hidden" name="lang" value="en">
+        <button type="submit" class="lang-btn{{if eq .Base.Lang "en"}} active{{end}}">EN</button>
+      </form>
+    </div>
+  </nav>
+
+  <div class="spell-icon">
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 4 C14 4 6 14 6 24 C6 34 14 44 24 44 C34 44 42 34 42 24" stroke-linecap="round"/>
+      <path d="M24 4 C26 14 32 18 42 24" stroke-linecap="round"/>
+      <path d="M6 24 C16 22 20 28 24 44" stroke-linecap="round"/>
+      <circle cx="24" cy="24" r="3" fill="currentColor" stroke="none"/>
+    </svg>
+  </div>
+
+  <form class="spell-form" id="spell-form" method="POST" action="/login">
+    <div class="spell-input-wrap">
+      <input
+        id="spell-input"
+        class="spell-input{{if .Error}} has-error{{end}}"
+        type="text"
+        name="spell"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        placeholder="{{t .Base.Lang "spell.placeholder"}}"
+        value="{{.PrefillSpell}}"
+        autofocus
+      >
+      <div class="spell-input-glow"></div>
+    </div>
+
+    {{if .Error}}
+    <div class="spell-error">{{t .Base.Lang "spell.error"}}</div>
+    {{else}}
+    <div class="spell-error" style="visibility:hidden">·</div>
+    {{end}}
+
+    <button type="submit" class="spell-submit">
+      {{t .Base.Lang "spell.submit"}}
+    </button>
+  </form>
+
+  <p class="spell-hint">{{t .Base.Lang "spell.hint"}}</p>
+</div>
+
+{{template "_scripts_guest" .}}
+</body>
+</html>

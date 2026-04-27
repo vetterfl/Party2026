@@ -1,0 +1,46 @@
+{{template "_head_admin" .}}
+<body>
+<div class="admin-layout">
+{{template "_admin_topbar" .}}
+<main class="admin-main">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Newsletter</h1>
+      <p class="page-subtitle">{{.RecipientCount}} recipients with newsletter opt-in</p>
+    </div>
+  </div>
+
+  {{if .Sent}}
+  <div class="alert alert-success">Newsletter sent to {{.RecipientCount}} recipients.</div>
+  {{end}}
+
+  {{if .Error}}
+  <div class="alert alert-error">Send error: {{.Error}}</div>
+  {{end}}
+
+  <form class="admin-form wide" method="POST" action="/admin/newsletter">
+    <div class="field">
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" name="subject" placeholder="Summer Party Update…" required>
+    </div>
+
+    <div class="field">
+      <label for="body">Body (Markdown)</label>
+      <textarea class="newsletter-body" id="body" name="body" placeholder="# Update&#10;&#10;Hey everyone, …" required></textarea>
+      <span class="form-hint">Markdown is rendered to HTML. An unsubscribe link is added automatically.</span>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"
+        data-confirm="Send newsletter to {{.RecipientCount}} recipients?">
+        Send to {{.RecipientCount}} recipients
+      </button>
+    </div>
+  </form>
+
+</main>
+</div>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

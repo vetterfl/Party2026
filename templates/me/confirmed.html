@@ -1,0 +1,96 @@
+{{template "_head_guest" .}}
+<body class="confirmed-page">
+{{template "_pool_bg" .}}
+{{template "_nav_guest" .}}
+
+<main class="confirmed-container">
+  <div class="confirmed-icon">
+    {{if eq .Base.Guest.Status "accepted"}}
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="24" cy="24" r="20"/>
+      <path d="M14 24l7 7 13-13" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    {{else}}
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted)">
+      <circle cx="24" cy="24" r="20"/>
+      <path d="M16 16l16 16M32 16L16 32" stroke-linecap="round"/>
+    </svg>
+    {{end}}
+  </div>
+
+  <h1 class="confirmed-title">
+    {{if eq .Base.Guest.Status "accepted"}}
+      {{t .Base.Lang "confirmed.title"}}
+    {{else}}
+      {{if eq .Base.Lang "en"}}Too bad.{{else}}Schade.{{end}}
+    {{end}}
+  </h1>
+
+  <p class="confirmed-subtitle">
+    {{if eq .Base.Guest.Status "accepted"}}
+      {{t .Base.Lang "confirmed.accepted"}}
+    {{else}}
+      {{t .Base.Lang "confirmed.declined"}}
+    {{end}}
+  </p>
+
+  {{/* Recap */}}
+  {{if eq .Base.Guest.Status "accepted"}}
+  <div class="confirmed-recap">
+    <div class="recap-row">
+      <span class="recap-label">{{if eq .Base.Lang "en"}}Name{{else}}Name{{end}}</span>
+      <span class="recap-value">{{.Base.Guest.Name}}</span>
+    </div>
+    {{if .Base.Guest.PlusOne}}
+    <div class="recap-row">
+      <span class="recap-label">{{t .Base.Lang "confirmed.plus_one"}}</span>
+      <span class="recap-value">{{if deref .Base.Guest.PlusOneName}}{{deref .Base.Guest.PlusOneName}}{{else}}✓{{end}}</span>
+    </div>
+    {{end}}
+    {{if gt .Base.Guest.Children 0}}
+    <div class="recap-row">
+      <span class="recap-label">{{t .Base.Lang "confirmed.children"}}</span>
+      <span class="recap-value">{{.Base.Guest.Children}}</span>
+    </div>
+    {{end}}
+    {{if deref .Base.Guest.Song}}
+    <div class="recap-row">
+      <span class="recap-label">{{t .Base.Lang "confirmed.song"}}</span>
+      <span class="recap-value" style="font-style:italic">{{deref .Base.Guest.Song}}</span>
+    </div>
+    {{end}}
+    <div class="recap-row">
+      <span class="recap-label">{{if eq .Base.Lang "en"}}Date{{else}}Datum{{end}}</span>
+      <span class="recap-value">{{t .Base.Lang "date.label"}}</span>
+    </div>
+  </div>
+  {{end}}
+
+  {{/* Confirmation message from CMS */}}
+  {{with content .Base.Content "confirmation_message" .Base.Lang}}
+  <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7">{{.}}</div>
+  {{end}}
+
+  {{/* Charity CTA */}}
+  {{if cfg .Base.Config "charity_url"}}
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:2rem;text-align:center">
+    <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem">
+      {{t .Base.Lang "charity.cta"}}
+    </p>
+    {{with content .Base.Content "charity_name" .Base.Lang}}<p style="color:var(--text);margin-bottom:0.75rem"><strong>{{.}}</strong></p>{{end}}
+    <a href="{{cfg .Base.Config "charity_url"}}" target="_blank" rel="noopener" class="btn btn-outline">
+      {{t .Base.Lang "charity.cta"}} →
+    </a>
+  </div>
+  {{end}}
+
+  <div class="confirmed-actions">
+    <a href="/me/rsvp" class="btn btn-outline">{{t .Base.Lang "confirmed.change"}}</a>
+    <a href="/me" class="btn btn-ghost">← {{if eq .Base.Lang "en"}}Back{{else}}Zurück{{end}}</a>
+  </div>
+
+</main>
+
+{{template "_scripts_guest" .}}
+</body>
+</html>

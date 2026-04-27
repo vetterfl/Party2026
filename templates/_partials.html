@@ -1,0 +1,66 @@
+{{define "_head_guest"}}
+<!DOCTYPE html>
+<html lang="{{.Base.Lang}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Summer Party 2026</title>
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+{{end}}
+
+{{define "_nav_guest"}}
+<nav class="nav">
+  <div class="nav-lang">
+    <form method="POST" action="/lang" style="display:contents">
+      <input type="hidden" name="lang" value="de">
+      <button type="submit" class="lang-btn{{if eq .Base.Lang "de"}} active{{end}}">DE</button>
+    </form>
+    <form method="POST" action="/lang" style="display:contents">
+      <input type="hidden" name="lang" value="en">
+      <button type="submit" class="lang-btn{{if eq .Base.Lang "en"}} active{{end}}">EN</button>
+    </form>
+  </div>
+  <a href="/logout" class="nav-logout">{{t .Base.Lang "nav.logout"}}</a>
+</nav>
+{{end}}
+
+{{define "_head_admin"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin — Summer Party 2026</title>
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+{{end}}
+
+{{define "_admin_topbar"}}
+<header class="admin-topbar">
+  <span class="admin-logo">Party 2026 · Admin</span>
+  <nav class="admin-nav">
+    <a href="/admin" class="admin-nav-link">Dashboard</a>
+    <a href="/admin/guests" class="admin-nav-link">Guests</a>
+    <a href="/admin/content" class="admin-nav-link">Content</a>
+    <a href="/admin/newsletter" class="admin-nav-link">Newsletter</a>
+    <a href="/admin/config" class="admin-nav-link">Config</a>
+    <a href="/admin/logout" class="admin-nav-link" style="color:#ff4d6d;margin-left:0.5rem">Logout</a>
+  </nav>
+</header>
+{{end}}
+
+{{define "_pool_bg"}}
+<div class="pool-bg" aria-hidden="true">
+  <div class="pool-blob"></div>
+  <div class="pool-blob"></div>
+  <div class="pool-blob"></div>
+</div>
+<div class="pool-shimmer" aria-hidden="true"></div>
+{{end}}
+
+{{define "_scripts_guest"}}
+<script src="/assets/js/main.js"></script>
+{{end}}

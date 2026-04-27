@@ -1,0 +1,115 @@
+{{template "_head_guest" .}}
+<body class="me-page">
+{{template "_pool_bg" .}}
+{{template "_nav_guest" .}}
+
+<main>
+  {{/* Hero */}}
+  <section class="me-hero">
+    <p class="me-greeting">{{t .Base.Lang "nav.logout" | lower}} — {{cfg .Base.Config "party_name_de"}}</p>
+    <h1 class="me-name">
+      {{- if eq .Base.Lang "en" -}}
+        Hey, <span class="me-name-accent">{{.Base.Guest.Name}}</span>!
+      {{- else -}}
+        Hey, <span class="me-name-accent">{{.Base.Guest.Name}}</span>!
+      {{- end -}}
+    </h1>
+    <div class="me-date-badge">
+      <span class="me-date-dot"></span>
+      {{t .Base.Lang "date.label"}}
+    </div>
+  </section>
+
+  <div class="me-hero-line"></div>
+
+  {{/* Content sections */}}
+  <div class="me-content">
+
+    {{/* Event description */}}
+    {{with content .Base.Content "event_description" .Base.Lang}}
+    <div class="content-card full-width reveal">
+      <div class="content-card-label">Info</div>
+      {{.}}
+    </div>
+    {{end}}
+
+    {{/* What to expect */}}
+    {{with content .Base.Content "what_to_expect" .Base.Lang}}
+    <div class="content-card reveal">
+      <div class="content-card-label">
+        {{if eq $.Base.Lang "en"}}What to expect{{else}}Was erwartet euch{{end}}
+      </div>
+      {{.}}
+    </div>
+    {{end}}
+
+    {{/* Kids section */}}
+    {{with content .Base.Content "kids_section" .Base.Lang}}
+    <div class="content-card kids-card reveal">
+      <div class="content-card-label">
+        {{if eq $.Base.Lang "en"}}For the kids{{else}}Für die Kids{{end}}
+      </div>
+      {{.}}
+    </div>
+    {{end}}
+
+    {{/* Special thing */}}
+    {{with content .Base.Content "special_thing" .Base.Lang}}
+    <div class="content-card full-width reveal">
+      <div class="content-card-label">
+        {{if eq $.Base.Lang "en"}}Something special{{else}}Das Besondere{{end}}
+      </div>
+      {{.}}
+    </div>
+    {{end}}
+
+    {{/* Charity */}}
+    {{if or (content .Base.Content "charity_name" .Base.Lang) (cfg .Base.Config "charity_url")}}
+    <div class="content-card charity-card full-width reveal">
+      <div class="content-card-label">{{t .Base.Lang "charity.cta"}}</div>
+      {{with content .Base.Content "charity_name" .Base.Lang}}<p><strong>{{.}}</strong></p>{{end}}
+      {{with content .Base.Content "charity_description" .Base.Lang}}{{.}}{{end}}
+      {{with cfg .Base.Config "charity_url"}}
+        <p style="margin-top:1rem">
+          <a href="{{.}}" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:0.75rem;padding:0.6rem 1.25rem">
+            {{t $.Base.Lang "charity.cta"}} →
+          </a>
+        </p>
+      {{end}}
+    </div>
+    {{end}}
+
+  </div>
+
+  {{/* RSVP section */}}
+  <section class="rsvp-section">
+    {{with content .Base.Content "rsvp_note" .Base.Lang}}<p class="rsvp-label">{{.}}</p>{{end}}
+
+    {{if .Base.Guest.RSVPAt}}
+      {{/* Already RSVPed */}}
+      <div class="rsvp-status-badge {{.Base.Guest.Status}}">
+        {{statusLabel .Base.Lang .Base.Guest.Status}}
+      </div>
+      <br>
+      <div class="rsvp-actions">
+        <a href="/me/rsvp" class="btn btn-outline">{{t .Base.Lang "rsvp.update"}}</a>
+      </div>
+    {{else}}
+      <div class="rsvp-actions">
+        <a href="/me/rsvp" class="btn btn-primary">{{t .Base.Lang "rsvp.attending_yes"}}</a>
+        <a href="/me/rsvp" class="btn btn-outline">{{t .Base.Lang "rsvp.attending_no"}}</a>
+      </div>
+    {{end}}
+  </section>
+
+  {{/* Footer */}}
+  {{with content .Base.Content "footer_note" .Base.Lang}}
+  <footer style="text-align:center;padding:2rem;font-size:0.8rem;color:var(--text-dim)">
+    {{.}}
+  </footer>
+  {{end}}
+</main>
+
+{{template "_scripts_guest" .}}
+</body>
+</html>

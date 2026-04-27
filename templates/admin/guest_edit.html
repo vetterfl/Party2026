@@ -1,0 +1,83 @@
+{{template "_head_admin" .}}
+<body>
+<div class="admin-layout">
+{{template "_admin_topbar" .}}
+<main class="admin-main">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Edit Guest</h1>
+      <p class="page-subtitle">{{.Guest.Name}} · <code style="font-size:0.8rem;color:var(--accent)">{{.Guest.Code}}</code></p>
+    </div>
+    <div style="display:flex;gap:0.5rem">
+      <a href="/admin/guests/{{.Guest.ID}}/qr" class="btn btn-outline btn-sm">Download QR</a>
+      <a href="/admin/guests/{{.Guest.ID}}/card" class="btn btn-outline btn-sm" target="_blank">Print Card</a>
+      <button class="btn btn-outline btn-sm" data-copy="{{.BaseURL}}/?spell={{.Guest.Code}}">Copy Link</button>
+    </div>
+  </div>
+
+  <form class="admin-form" method="POST" action="/admin/guests/{{.Guest.ID}}/edit">
+    <div class="field">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" value="{{.Guest.Name}}" required>
+    </div>
+
+    <div class="field">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="invited"     {{if eq .Guest.Status "invited"}}selected{{end}}>Invited</option>
+        <option value="accepted"    {{if eq .Guest.Status "accepted"}}selected{{end}}>Accepted</option>
+        <option value="declined"    {{if eq .Guest.Status "declined"}}selected{{end}}>Declined</option>
+        <option value="tentative"   {{if eq .Guest.Status "tentative"}}selected{{end}}>Tentative</option>
+        <option value="no_response" {{if eq .Guest.Status "no_response"}}selected{{end}}>No Response</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{deref .Guest.Email}}" placeholder="optional">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="plus_one">Plus One</label>
+        <select id="plus_one" name="plus_one">
+          <option value="0" {{if not .Guest.PlusOne}}selected{{end}}>No</option>
+          <option value="1" {{if .Guest.PlusOne}}selected{{end}}>Yes</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="plus_one_name">Plus One Name</label>
+        <input type="text" id="plus_one_name" name="plus_one_name" value="{{deref .Guest.PlusOneName}}" placeholder="optional">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="children">Children</label>
+        <input type="number" id="children" name="children" value="{{.Guest.Children}}" min="0" max="10">
+      </div>
+      <div class="field">
+        <label for="song">Favourite Song</label>
+        <input type="text" id="song" name="song" value="{{deref .Guest.Song}}" placeholder="optional">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="/admin/guests" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+
+  <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+    <form method="POST" action="/admin/guests/{{.Guest.ID}}/delete">
+      <button type="submit" class="btn btn-danger btn-sm"
+        data-confirm="Permanently delete {{.Guest.Name}}?">Delete Guest</button>
+    </form>
+  </div>
+
+</main>
+</div>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

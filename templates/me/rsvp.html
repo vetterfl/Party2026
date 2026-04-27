@@ -1,0 +1,131 @@
+{{template "_head_guest" .}}
+<body class="rsvp-page">
+{{template "_pool_bg" .}}
+{{template "_nav_guest" .}}
+
+<main class="rsvp-container">
+  <h1 class="rsvp-page-title">{{t .Base.Lang "rsvp.title"}}</h1>
+  <p class="rsvp-page-subtitle">— {{.Base.Guest.Name}}</p>
+
+  <form class="form-card" id="rsvp-form" method="POST" action="/me/rsvp">
+
+    {{/* Attending? */}}
+    <div class="form-field">
+      <span class="form-label">
+        {{if eq .Base.Lang "en"}}Coming?{{else}}Kommst du?{{end}}
+      </span>
+      <div class="radio-group">
+        <div class="radio-tile">
+          <input type="radio" name="attending" id="attending-yes" value="yes"
+            {{if eq .Base.Guest.Status "accepted"}}checked{{end}}
+            {{if eq .Base.Guest.Status "invited"}}checked{{end}}>
+          <label class="radio-tile-label" for="attending-yes">
+            ✓ {{t .Base.Lang "rsvp.attending_yes"}}
+          </label>
+        </div>
+        <div class="radio-tile decline">
+          <input type="radio" name="attending" id="attending-no" value="no"
+            {{if eq .Base.Guest.Status "declined"}}checked{{end}}>
+          <label class="radio-tile-label" for="attending-no">
+            ✗ {{t .Base.Lang "rsvp.attending_no"}}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="optional-fields">
+      <div style="display:flex;flex-direction:column;gap:1.75rem">
+
+        {{/* Plus one */}}
+        <div class="form-field">
+          <span class="form-label">{{t .Base.Lang "rsvp.plus_one"}}</span>
+          <div class="radio-group">
+            <div class="radio-tile">
+              <input type="radio" name="plus_one" id="plus-one-yes" value="yes"
+                {{if .Base.Guest.PlusOne}}checked{{end}}>
+              <label class="radio-tile-label" for="plus-one-yes">{{t .Base.Lang "rsvp.plus_one_yes"}}</label>
+            </div>
+            <div class="radio-tile">
+              <input type="radio" name="plus_one" id="plus-one-no" value="no"
+                {{if not .Base.Guest.PlusOne}}checked{{end}}>
+              <label class="radio-tile-label" for="plus-one-no">{{t .Base.Lang "rsvp.plus_one_no"}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div id="plus-one-name-field" class="form-field{{if not .Base.Guest.PlusOne}} hidden{{end}}">
+          <label class="form-label" for="plus-one-name">{{t .Base.Lang "rsvp.plus_one_name"}}</label>
+          <input class="form-input" type="text" id="plus-one-name" name="plus_one_name"
+            value="{{deref .Base.Guest.PlusOneName}}"
+            placeholder="Name…">
+        </div>
+
+        <div class="form-divider"></div>
+
+        {{/* Kids */}}
+        <div class="form-field">
+          <label class="form-label" for="children-select">{{t .Base.Lang "rsvp.children"}}</label>
+          <select class="form-select" id="children-select" name="children" style="max-width:200px">
+            <option value="0"{{if eq .Base.Guest.Children 0}} selected{{end}}>0</option>
+            <option value="1"{{if eq .Base.Guest.Children 1}} selected{{end}}>1</option>
+            <option value="2"{{if eq .Base.Guest.Children 2}} selected{{end}}>2</option>
+            <option value="3"{{if eq .Base.Guest.Children 3}} selected{{end}}>3</option>
+            <option value="4"{{if eq .Base.Guest.Children 4}} selected{{end}}>4</option>
+            <option value="5"{{if eq .Base.Guest.Children 5}} selected{{end}}>5</option>
+          </select>
+        </div>
+
+        <div class="form-divider"></div>
+
+        {{/* Song */}}
+        <div class="form-field">
+          <label class="form-label" for="song-input">{{t .Base.Lang "rsvp.song"}}</label>
+          <input class="form-input" type="text" id="song-input" name="song"
+            value="{{deref .Base.Guest.Song}}"
+            placeholder="Artist – Song title">
+          <span class="form-hint">{{t .Base.Lang "rsvp.song_hint"}}</span>
+        </div>
+
+        {{/* Comment */}}
+        <div class="form-field">
+          <label class="form-label" for="comment-input">{{t .Base.Lang "rsvp.comment"}}</label>
+          <textarea class="form-textarea" id="comment-input" name="comment"
+            placeholder="…">{{deref .Base.Guest.Comment}}</textarea>
+        </div>
+
+        <div class="form-divider"></div>
+
+        {{/* Email + newsletter */}}
+        <div class="form-field">
+          <label class="form-label" for="email-input">{{t .Base.Lang "rsvp.email"}}</label>
+          <input class="form-input" type="email" id="email-input" name="email"
+            value="{{deref .Base.Guest.Email}}"
+            placeholder="mail@example.com">
+          <span class="form-hint">{{t .Base.Lang "rsvp.email_hint"}}</span>
+        </div>
+
+        <div id="newsletter-field" class="{{if isNil .Base.Guest.Email}}hidden{{end}}">
+          <label class="checkbox-wrap">
+            <input type="checkbox" name="newsletter" value="on"
+              {{if .Base.Guest.Newsletter}}checked{{end}}>
+            <span class="checkbox-text">{{t .Base.Lang "rsvp.newsletter"}}</span>
+          </label>
+        </div>
+
+      </div>{{/* /optional-fields inner */}}
+    </div>{{/* /optional-fields */}}
+
+    <div class="form-footer">
+      <button type="submit" class="btn btn-primary">{{t .Base.Lang "rsvp.submit"}}</button>
+    </div>
+
+  </form>
+
+  <div style="text-align:center;margin-top:1.5rem">
+    <a href="/me" class="btn btn-ghost">← {{if eq .Base.Lang "en"}}Back{{else}}Zurück{{end}}</a>
+  </div>
+</main>
+
+{{template "_scripts_guest" .}}
+</body>
+</html>

@@ -1,0 +1,88 @@
+{{template "_head_admin" .}}
+<body>
+<div class="admin-layout">
+{{template "_admin_topbar" .}}
+<main class="admin-main">
+
+  <div class="page-header">
+    <h1 class="page-title">Guests</h1>
+    <div style="display:flex;gap:0.5rem">
+      <a href="/admin/export/csv" class="btn btn-outline btn-sm">Export CSV</a>
+    </div>
+  </div>
+
+  {{/* Add guest */}}
+  <form class="inline-form" method="POST" action="/admin/guests">
+    <input type="text" name="name" placeholder="Guest name…" required>
+    <button type="submit" class="btn btn-primary btn-sm">Add Guest</button>
+  </form>
+
+  {{/* Filter tabs */}}
+  <div class="filter-tabs">
+    <a href="/admin/guests" class="filter-tab{{if eq .Filter ""}} active{{end}}">All ({{len .Guests}})</a>
+    <a href="/admin/guests?status=invited"     class="filter-tab{{if eq .Filter "invited"}} active{{end}}">Invited</a>
+    <a href="/admin/guests?status=accepted"    class="filter-tab{{if eq .Filter "accepted"}} active{{end}}">Accepted</a>
+    <a href="/admin/guests?status=declined"    class="filter-tab{{if eq .Filter "declined"}} active{{end}}">Declined</a>
+    <a href="/admin/guests?status=tentative"   class="filter-tab{{if eq .Filter "tentative"}} active{{end}}">Tentative</a>
+    <a href="/admin/guests?status=no_response" class="filter-tab{{if eq .Filter "no_response"}} active{{end}}">No Response</a>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Code</th>
+          <th>Status</th>
+          <th>+1</th>
+          <th>Kids</th>
+          <th>Song</th>
+          <th>NL</th>
+          <th>RSVP</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Guests}}
+        <tr>
+          <td class="name-col">{{.Name}}</td>
+          <td class="code-col">{{.Code}}</td>
+          <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+          <td>{{if .PlusOne}}{{if deref .PlusOneName}}{{deref .PlusOneName}}{{else}}✓{{end}}{{else}}–{{end}}</td>
+          <td>{{if gt .Children 0}}{{.Children}}{{else}}–{{end}}</td>
+          <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            {{if deref .Song}}<span title="{{deref .Song}}">{{deref .Song}}</span>{{else}}–{{end}}
+          </td>
+          <td>{{boolCheck .Newsletter}}</td>
+          <td style="white-space:nowrap;font-size:0.75rem">{{formatDatePtr .RSVPAt}}</td>
+          <td>
+            <div class="action-group">
+              <button class="btn btn-outline btn-xs"
+                data-copy="{{$.BaseURL}}/?spell={{.Code}}"
+                title="Copy invite link">⎘</button>
+              <a href="/admin/guests/{{.ID}}/qr" class="btn btn-outline btn-xs" title="Download QR">QR</a>
+              <a href="/admin/guests/{{.ID}}/card" class="btn btn-outline btn-xs" title="Print card" target="_blank">Card</a>
+              <a href="/admin/guests/{{.ID}}/edit" class="btn btn-outline btn-xs">Edit</a>
+              <form method="POST" action="/admin/guests/{{.ID}}/delete" style="display:inline">
+                <button type="submit" class="btn btn-danger btn-xs"
+                  data-confirm="Delete {{.Name}}?">✕</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {{else}}
+        <tr>
+          <td colspan="9" style="text-align:center;color:var(--text-dim);padding:2rem">
+            No guests yet.
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

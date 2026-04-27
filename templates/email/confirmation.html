@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 0; background: #f4f4f4; font-family: system-ui, sans-serif; }
+    .wrap { max-width: 520px; margin: 2rem auto; background: #050d1a; border-radius: 8px; overflow: hidden; }
+    .header { padding: 2rem 2rem 1.5rem; border-bottom: 1px solid rgba(0,212,170,0.15); }
+    .header-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #00d4aa; margin-bottom: 0.5rem; }
+    .header-title { font-size: 22px; font-weight: 300; color: #e8f4f8; letter-spacing: -0.02em; }
+    .body { padding: 1.5rem 2rem; }
+    p { color: #6b8fa3; font-size: 14px; line-height: 1.7; margin: 0 0 1rem; }
+    .highlight { color: #e8f4f8; }
+    .detail-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+    .detail-label { color: #3d6070; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+    .detail-value { color: #e8f4f8; }
+    .footer { padding: 1.25rem 2rem; border-top: 1px solid rgba(255,255,255,0.05); }
+    .footer p { font-size: 11px; color: #3d6070; margin: 0; }
+    .footer a { color: #00d4aa; }
+    .btn { display: inline-block; background: #00d4aa; color: #050d1a; padding: 0.7rem 1.75rem; border-radius: 4px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-decoration: none; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-label">Summer Party 2026</div>
+    <h1 class="header-title">
+      {{if eq .Lang "en"}}Your RSVP is confirmed, {{.Guest.Name}}.{{else}}Deine Anmeldung ist bestätigt, {{.Guest.Name}}.{{end}}
+    </h1>
+  </div>
+
+  <div class="body">
+    {{if eq .Guest.Status "accepted"}}
+    <p class="highlight">
+      {{if eq .Lang "en"}}Great — see you on August 1st!{{else}}Super — wir sehen uns am 1. August!{{end}}
+    </p>
+
+    <div>
+      <div class="detail-row">
+        <span class="detail-label">{{if eq .Lang "en"}}Date{{else}}Datum{{end}}</span>
+        <span class="detail-value">01.08.2026 · {{if eq .Lang "en"}}from 4 pm{{else}}ab 16 Uhr{{end}}</span>
+      </div>
+      {{if .Guest.PlusOne}}
+      <div class="detail-row">
+        <span class="detail-label">+1</span>
+        <span class="detail-value">{{if deref .Guest.PlusOneName}}{{deref .Guest.PlusOneName}}{{else}}✓{{end}}</span>
+      </div>
+      {{end}}
+      {{if gt .Guest.Children 0}}
+      <div class="detail-row">
+        <span class="detail-label">{{if eq .Lang "en"}}Kids{{else}}Kinder{{end}}</span>
+        <span class="detail-value">{{.Guest.Children}}</span>
+      </div>
+      {{end}}
+      {{if deref .Guest.Song}}
+      <div class="detail-row">
+        <span class="detail-label">Song</span>
+        <span class="detail-value" style="font-style:italic">{{deref .Guest.Song}}</span>
+      </div>
+      {{end}}
+    </div>
+
+    {{if index .Config "charity_url"}}
+    <p style="margin-top:1.5rem">
+      {{if eq .Lang "en"}}Instead of gifts, please consider a small donation:{{else}}Statt Geschenken freuen wir uns über eine kleine Spende:{{end}}
+    </p>
+    <a href="{{index .Config "charity_url"}}" class="btn">
+      {{if eq .Lang "en"}}Donate{{else}}Jetzt spenden{{end}}
+    </a>
+    {{end}}
+
+    {{else}}{{/* declined */}}
+    <p class="highlight">
+      {{if eq .Lang "en"}}No worries — hope to see you next time!{{else}}Schade, vielleicht beim nächsten Mal!{{end}}
+    </p>
+    {{end}}
+  </div>
+
+  <div class="footer">
+    <p>
+      {{if eq .Lang "en"}}Changed your mind?{{else}}Meinung geändert?{{end}}
+      <a href="{{index .Config "base_url"}}/me/rsvp">
+        {{if eq .Lang "en"}}Update your RSVP{{else}}Anmeldung ändern{{end}}
+      </a>
+      &nbsp;·&nbsp;
+      <a href="{{.UnsubURL}}">
+        {{if eq .Lang "en"}}Unsubscribe{{else}}Abmelden{{end}}
+      </a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

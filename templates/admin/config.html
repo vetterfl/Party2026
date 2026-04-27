@@ -1,0 +1,82 @@
+{{template "_head_admin" .}}
+<body>
+<div class="admin-layout">
+{{template "_admin_topbar" .}}
+<main class="admin-main">
+
+  <div class="page-header">
+    <h1 class="page-title">Site Config</h1>
+  </div>
+
+  {{if .Saved}}
+  <div class="alert alert-success">Saved successfully.</div>
+  {{end}}
+
+  <form class="admin-form" method="POST" action="/admin/config">
+
+    <div class="field-row">
+      <div class="field">
+        <label for="party_date">Party Date</label>
+        <input type="date" id="party_date" name="party_date" value="{{index .Config "party_date"}}">
+      </div>
+      <div class="field">
+        <label for="party_time_start">Start Time</label>
+        <input type="text" id="party_time_start" name="party_time_start" value="{{index .Config "party_time_start"}}" placeholder="16:00">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="party_name_de">Party Name (DE)</label>
+        <input type="text" id="party_name_de" name="party_name_de" value="{{index .Config "party_name_de"}}">
+      </div>
+      <div class="field">
+        <label for="party_name_en">Party Name (EN)</label>
+        <input type="text" id="party_name_en" name="party_name_en" value="{{index .Config "party_name_en"}}">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="rsvp_deadline">RSVP Deadline</label>
+      <input type="date" id="rsvp_deadline" name="rsvp_deadline" value="{{index .Config "rsvp_deadline"}}">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="charity_name">Charity Name</label>
+        <input type="text" id="charity_name" name="charity_name" value="{{index .Config "charity_name"}}" placeholder="optional">
+      </div>
+      <div class="field">
+        <label for="charity_url">Charity URL</label>
+        <input type="text" id="charity_url" name="charity_url" value="{{index .Config "charity_url"}}" placeholder="https://…">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="smtp_from_name">Email From Name</label>
+      <input type="text" id="smtp_from_name" name="smtp_from_name" value="{{index .Config "smtp_from_name"}}">
+    </div>
+
+    <div style="height:1px;background:var(--border)"></div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="admin_user">Admin Username</label>
+        <input type="text" id="admin_user" name="admin_user" value="{{index .Config "admin_user"}}">
+      </div>
+      <div class="field">
+        <label for="admin_password">New Password</label>
+        <input type="password" id="admin_password" name="admin_password" placeholder="leave blank to keep">
+        <span class="form-hint">Stored as bcrypt hash.</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Config</button>
+    </div>
+  </form>
+
+</main>
+</div>
+</body>
+</html>

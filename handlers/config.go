@@ -34,7 +34,8 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 		"party_date", "party_time_start",
 		"party_name_de", "party_name_en",
 		"rsvp_deadline", "charity_name", "charity_url",
-		"smtp_from_name", "admin_user",
+		"smtp_from_name", "invite_message_de", "invite_message_en",
+		"admin_user",
 	}
 	for _, k := range keys {
 		if v := c.FormValue(k); v != "" {

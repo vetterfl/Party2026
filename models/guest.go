@@ -16,6 +16,7 @@ type Guest struct {
 	Name        string     `db:"name"`
 	Status      string     `db:"status"`
 	Email       *string    `db:"email"`
+	PhoneE164   *string    `db:"phone_e164"`
 	PlusOne     bool       `db:"plus_one"`
 	PlusOneName *string    `db:"plus_one_name"`
 	Children    int        `db:"children"`
@@ -82,10 +83,10 @@ func (s *GuestStore) Update(g *Guest) error {
 	g.UpdatedAt = time.Now()
 	_, err := s.db.Exec(`
 		UPDATE guests SET
-			name=?, status=?, email=?, plus_one=?, plus_one_name=?,
+			name=?, status=?, email=?, phone_e164=?, plus_one=?, plus_one_name=?,
 			children=?, song=?, comment=?, newsletter=?, rsvp_at=?, updated_at=?
 		WHERE id=?`,
-		g.Name, g.Status, g.Email, g.PlusOne, g.PlusOneName,
+		g.Name, g.Status, g.Email, g.PhoneE164, g.PlusOne, g.PlusOneName,
 		g.Children, g.Song, g.Comment, g.Newsletter, g.RSVPAt, g.UpdatedAt,
 		g.ID,
 	)

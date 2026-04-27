@@ -57,6 +57,19 @@
       <input type="text" id="smtp_from_name" name="smtp_from_name" value="{{index .Config "smtp_from_name"}}">
     </div>
 
+    <div class="field-row">
+      <div class="field">
+        <label for="invite_message_de">Invite Message (DE)</label>
+        <textarea id="invite_message_de" name="invite_message_de" rows="3">{{index .Config "invite_message_de"}}</textarea>
+        <span class="form-hint">Use {name} and {url} placeholders.</span>
+      </div>
+      <div class="field">
+        <label for="invite_message_en">Invite Message (EN)</label>
+        <textarea id="invite_message_en" name="invite_message_en" rows="3">{{index .Config "invite_message_en"}}</textarea>
+        <span class="form-hint">Use {name} and {url} placeholders.</span>
+      </div>
+    </div>
+
     <div style="height:1px;background:var(--border)"></div>
 
     <div class="field-row">

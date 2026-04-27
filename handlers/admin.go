@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -22,6 +23,13 @@ type AdminHandler struct {
 	content *models.ContentStore
 	mailer  *Mailer
 	baseURL string
+}
+
+type guestInviteRow struct {
+	Guest         models.Guest
+	InviteURL     string
+	InviteMessage string
+	WhatsAppURL   string
 }
 
 func NewAdminHandler(g *models.GuestStore, cfg *models.ConfigStore, cnt *models.ContentStore, m *Mailer, baseURL string) *AdminHandler {
@@ -97,11 +105,13 @@ func (h *AdminHandler) GuestList(c echo.Context) error {
 		return err
 	}
 	cfg, _ := h.config.All()
+	rows := h.guestInviteRows(guests, cfg)
 	return c.Render(http.StatusOK, "guests.html", map[string]interface{}{
-		"Guests":  guests,
-		"Filter":  filter,
-		"BaseURL": h.baseURL,
-		"Config":  cfg,
+		"Guests":          guests,
+		"GuestInviteRows": rows,
+		"Filter":          filter,
+		"BaseURL":         h.baseURL,
+		"Config":          cfg,
 	})
 }
 
@@ -145,6 +155,16 @@ func (h *AdminHandler) GuestUpdate(c echo.Context) error {
 	} else {
 		g.Email = nil
 	}
+
+	phone, err := normalizePhoneE164(c.FormValue("phone_e164"))
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "guest_edit.html", map[string]interface{}{
+			"Guest":   g,
+			"BaseURL": h.baseURL,
+			"Error":   err.Error(),
+		})
+	}
+	g.PhoneE164 = phone
 
 	g.PlusOne = c.FormValue("plus_one") == "1"
 	if pname := strings.TrimSpace(c.FormValue("plus_one_name")); pname != "" {
@@ -224,7 +244,7 @@ func (h *AdminHandler) ExportCSV(c echo.Context) error {
 
 	var buf bytes.Buffer
 	w := csv.NewWriter(&buf)
-	_ = w.Write([]string{"Name", "Code", "Status", "Email", "Plus One", "Plus One Name", "Children", "Song", "Comment", "Newsletter", "RSVP At"})
+	_ = w.Write([]string{"Name", "Code", "Status", "Email", "Phone", "Plus One", "Plus One Name", "Children", "Song", "Comment", "Newsletter", "RSVP At"})
 	for _, g := range guests {
 		rsvpAt := ""
 		if g.RSVPAt != nil {
@@ -232,7 +252,7 @@ func (h *AdminHandler) ExportCSV(c echo.Context) error {
 		}
 		_ = w.Write([]string{
 			g.Name, g.Code, g.Status,
-			derefStr(g.Email), boolStr(g.PlusOne), derefStr(g.PlusOneName),
+			derefStr(g.Email), derefStr(g.PhoneE164), boolStr(g.PlusOne), derefStr(g.PlusOneName),
 			fmt.Sprint(g.Children), derefStr(g.Song), derefStr(g.Comment),
 			boolStr(g.Newsletter), rsvpAt,
 		})
@@ -256,4 +276,74 @@ func boolStr(b bool) string {
 		return "yes"
 	}
 	return "no"
+}
+
+func (h *AdminHandler) guestInviteRows(guests []models.Guest, cfg map[string]string) []guestInviteRow {
+	rows := make([]guestInviteRow, 0, len(guests))
+	for _, guest := range guests {
+		inviteURL := h.baseURL + "/?spell=" + guest.Code
+		message := inviteMessage(cfg, guest.Name, inviteURL)
+		row := guestInviteRow{
+			Guest:         guest,
+			InviteURL:     inviteURL,
+			InviteMessage: message,
+		}
+		if guest.PhoneE164 != nil && *guest.PhoneE164 != "" {
+			phone := strings.TrimPrefix(*guest.PhoneE164, "+")
+			row.WhatsAppURL = "https://wa.me/" + phone + "?text=" + url.QueryEscape(message)
+		}
+		rows = append(rows, row)
+	}
+	return rows
+}
+
+func inviteMessage(cfg map[string]string, name, inviteURL string) string {
+	tpl := cfg["invite_message_de"]
+	if strings.TrimSpace(tpl) == "" {
+		tpl = "Hi {name}, hier ist deine Einladung: {url}"
+	}
+	msg := strings.ReplaceAll(tpl, "{name}", name)
+	msg = strings.ReplaceAll(msg, "{url}", inviteURL)
+	return msg
+}
+
+func normalizePhoneE164(raw string) (*string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+
+	var b strings.Builder
+	for i := 0; i < len(raw); i++ {
+		ch := raw[i]
+		switch {
+		case ch >= '0' && ch <= '9':
+			b.WriteByte(ch)
+		case ch == '+' && b.Len() == 0:
+			b.WriteByte(ch)
+		case ch == ' ' || ch == '-' || ch == '(' || ch == ')' || ch == '.':
+			continue
+		default:
+			return nil, fmt.Errorf("phone must be E.164, e.g. +491701234567")
+		}
+	}
+
+	phone := b.String()
+	if strings.HasPrefix(phone, "00") {
+		phone = "+" + strings.TrimPrefix(phone, "00")
+	}
+	if !strings.HasPrefix(phone, "+") {
+		return nil, fmt.Errorf("phone must include country code, e.g. +491701234567")
+	}
+
+	digits := phone[1:]
+	if len(digits) < 8 || len(digits) > 15 || digits[0] == '0' {
+		return nil, fmt.Errorf("phone must be E.164, e.g. +491701234567")
+	}
+	for i := 0; i < len(digits); i++ {
+		if digits[i] < '0' || digits[i] > '9' {
+			return nil, fmt.Errorf("phone must be E.164, e.g. +491701234567")
+		}
+	}
+	return &phone, nil
 }

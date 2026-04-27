@@ -33,6 +33,7 @@
         <tr>
           <th>Name</th>
           <th>Code</th>
+          <th>Phone</th>
           <th>Status</th>
           <th>+1</th>
           <th>Kids</th>
@@ -43,36 +44,43 @@
         </tr>
       </thead>
       <tbody>
-        {{range .Guests}}
+        {{range .GuestInviteRows}}
         <tr>
-          <td class="name-col">{{.Name}}</td>
-          <td class="code-col">{{.Code}}</td>
-          <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
-          <td>{{if .PlusOne}}{{if deref .PlusOneName}}{{deref .PlusOneName}}{{else}}✓{{end}}{{else}}–{{end}}</td>
-          <td>{{if gt .Children 0}}{{.Children}}{{else}}–{{end}}</td>
+          <td class="name-col">{{.Guest.Name}}</td>
+          <td class="code-col">{{.Guest.Code}}</td>
+          <td style="white-space:nowrap;font-size:0.75rem">{{if deref .Guest.PhoneE164}}{{deref .Guest.PhoneE164}}{{else}}–{{end}}</td>
+          <td><span class="badge badge-{{.Guest.Status}}">{{.Guest.Status}}</span></td>
+          <td>{{if .Guest.PlusOne}}{{if deref .Guest.PlusOneName}}{{deref .Guest.PlusOneName}}{{else}}✓{{end}}{{else}}–{{end}}</td>
+          <td>{{if gt .Guest.Children 0}}{{.Guest.Children}}{{else}}–{{end}}</td>
           <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-            {{if deref .Song}}<span title="{{deref .Song}}">{{deref .Song}}</span>{{else}}–{{end}}
+            {{if deref .Guest.Song}}<span title="{{deref .Guest.Song}}">{{deref .Guest.Song}}</span>{{else}}–{{end}}
           </td>
-          <td>{{boolCheck .Newsletter}}</td>
-          <td style="white-space:nowrap;font-size:0.75rem">{{formatDatePtr .RSVPAt}}</td>
+          <td>{{boolCheck .Guest.Newsletter}}</td>
+          <td style="white-space:nowrap;font-size:0.75rem">{{formatDatePtr .Guest.RSVPAt}}</td>
           <td>
             <div class="action-group">
               <button class="btn btn-outline btn-xs"
-                data-copy="{{$.BaseURL}}/?spell={{.Code}}"
+                data-copy="{{.InviteURL}}"
                 title="Copy invite link">⎘</button>
-              <a href="/admin/guests/{{.ID}}/qr" class="btn btn-outline btn-xs" title="Download QR">QR</a>
-              <a href="/admin/guests/{{.ID}}/card" class="btn btn-outline btn-xs" title="Print card" target="_blank">Card</a>
-              <a href="/admin/guests/{{.ID}}/edit" class="btn btn-outline btn-xs">Edit</a>
-              <form method="POST" action="/admin/guests/{{.ID}}/delete" style="display:inline">
+              {{if .WhatsAppURL}}
+              <a href="{{.WhatsAppURL}}" class="btn btn-outline btn-xs" title="Open WhatsApp invite" target="_blank" rel="noopener">WA</a>
+              {{end}}
+              <button class="btn btn-outline btn-xs"
+                data-copy="{{.InviteMessage}}"
+                title="Copy full invite message for Signal">Signal</button>
+              <a href="/admin/guests/{{.Guest.ID}}/qr" class="btn btn-outline btn-xs" title="Download QR">QR</a>
+              <a href="/admin/guests/{{.Guest.ID}}/card" class="btn btn-outline btn-xs" title="Print card" target="_blank">Card</a>
+              <a href="/admin/guests/{{.Guest.ID}}/edit" class="btn btn-outline btn-xs">Edit</a>
+              <form method="POST" action="/admin/guests/{{.Guest.ID}}/delete" style="display:inline">
                 <button type="submit" class="btn btn-danger btn-xs"
-                  data-confirm="Delete {{.Name}}?">✕</button>
+                  data-confirm="Delete {{.Guest.Name}}?">✕</button>
               </form>
             </div>
           </td>
         </tr>
         {{else}}
         <tr>
-          <td colspan="9" style="text-align:center;color:var(--text-dim);padding:2rem">
+          <td colspan="10" style="text-align:center;color:var(--text-dim);padding:2rem">
             No guests yet.
           </td>
         </tr>

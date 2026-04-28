@@ -10,10 +10,11 @@ import (
 
 type ConfigHandler struct {
 	config *models.ConfigStore
+	themes []string
 }
 
-func NewConfigHandler(cfg *models.ConfigStore) *ConfigHandler {
-	return &ConfigHandler{config: cfg}
+func NewConfigHandler(cfg *models.ConfigStore, themes []string) *ConfigHandler {
+	return &ConfigHandler{config: cfg, themes: themes}
 }
 
 // GET /admin/config
@@ -24,6 +25,7 @@ func (h *ConfigHandler) Page(c echo.Context) error {
 	}
 	return c.Render(http.StatusOK, "config.html", map[string]interface{}{
 		"Config": cfg,
+		"Themes": h.themes,
 		"Saved":  false,
 	})
 }
@@ -43,6 +45,13 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 		}
 	}
 
+	// Theme selectors — allow empty selection (keep existing)
+	for _, k := range []string{"theme_login", "theme_me"} {
+		if v := c.FormValue(k); v != "" {
+			_ = h.config.Set(k, v)
+		}
+	}
+
 	// Update password only if provided
 	if newPass := c.FormValue("admin_password"); newPass != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(newPass), bcrypt.DefaultCost)
@@ -54,6 +63,7 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 	cfg, _ := h.config.All()
 	return c.Render(http.StatusOK, "config.html", map[string]interface{}{
 		"Config": cfg,
+		"Themes": h.themes,
 		"Saved":  true,
 	})
 }

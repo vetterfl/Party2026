@@ -2,7 +2,7 @@ package models
 
 import (
 	"crypto/rand"
-	"encoding/base32"
+	"math/big"
 	"strings"
 	"time"
 
@@ -154,12 +154,25 @@ func (s *GuestStore) UnsubscribeByID(id string) error {
 }
 
 func generateCode(n int) string {
-	b := make([]byte, n*2)
-	_, _ = rand.Read(b)
-	enc := base32.StdEncoding.EncodeToString(b)
-	enc = strings.NewReplacer("0", "", "O", "1", "=", "").Replace(enc)
-	if len(enc) < n {
-		return generateCode(n)
+	const consonants = "BCDFGHJKLMNPQRSTVWXYZ"
+	const vowels = "AEIOU"
+
+	var b strings.Builder
+	b.Grow(n)
+	for i := 0; i < n; i++ {
+		chars := consonants
+		if i%2 == 1 {
+			chars = vowels
+		}
+		b.WriteByte(randomChar(chars))
 	}
-	return enc[:n]
+	return b.String()
+}
+
+func randomChar(chars string) byte {
+	idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+	if err != nil {
+		panic(err)
+	}
+	return chars[idx.Int64()]
 }

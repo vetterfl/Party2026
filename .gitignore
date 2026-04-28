@@ -1,0 +1,33 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Built binaries
+app
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# SQLite databases and runtime data
+data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+
+# Temporary files and local notes
+tmp/
+notes.txt
+
+# Logs
+*.log
+
+# OS/editor noise
+.DS_Store
+.idea/
+.vscode/

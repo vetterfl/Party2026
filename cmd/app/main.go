@@ -76,11 +76,23 @@ func main() {
 		http.StripPrefix("/assets/", http.FileServer(http.FS(assetsSub))),
 	))
 
+	// Enumerate installed themes from embedded assets
+	var themes []string
+	if themesFS, err := fs.Sub(embedded.Assets, "assets/themes"); err == nil {
+		if entries, err := fs.ReadDir(themesFS, "."); err == nil {
+			for _, e := range entries {
+				if e.IsDir() {
+					themes = append(themes, e.Name())
+				}
+			}
+		}
+	}
+
 	gh := handlers.NewGuestHandler(guestStore, configStore, contentStore, mailer)
 	ah := handlers.NewAdminHandler(guestStore, configStore, contentStore, mailer, baseURL)
 	ch := handlers.NewContentHandler(contentStore)
 	nh := handlers.NewNewsletterHandler(guestStore, configStore, mailer)
-	cfgh := handlers.NewConfigHandler(configStore)
+	cfgh := handlers.NewConfigHandler(configStore, themes)
 
 	// Guest routes
 	e.GET("/", gh.SpellPage)

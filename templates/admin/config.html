@@ -70,6 +70,29 @@
       </div>
     </div>
 
+    {{if .Themes}}
+    <div style="height:1px;background:var(--border)"></div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="theme_login">Login Page Theme</label>
+        <select id="theme_login" name="theme_login">
+          {{range .Themes}}
+          <option value="{{.}}"{{if eq . (index $.Config "theme_login")}} selected{{end}}>{{.}}</option>
+          {{end}}
+        </select>
+      </div>
+      <div class="field">
+        <label for="theme_me">Guest Page Theme</label>
+        <select id="theme_me" name="theme_me">
+          {{range .Themes}}
+          <option value="{{.}}"{{if eq . (index $.Config "theme_me")}} selected{{end}}>{{.}}</option>
+          {{end}}
+        </select>
+      </div>
+    </div>
+    {{end}}
+
     <div style="height:1px;background:var(--border)"></div>
 
     <div class="field-row">

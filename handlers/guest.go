@@ -21,7 +21,7 @@ func NewGuestHandler(g *models.GuestStore, cfg *models.ConfigStore, cnt *models.
 	return &GuestHandler{guests: g, config: cfg, content: cnt, mailer: m}
 }
 
-func (h *GuestHandler) loadBase(c echo.Context, g *models.Guest) (BaseData, error) {
+func (h *GuestHandler) loadBase(c echo.Context, g *models.Guest, themeKey string) (BaseData, error) {
 	cfg, err := h.config.All()
 	if err != nil {
 		return BaseData{}, err
@@ -34,7 +34,11 @@ func (h *GuestHandler) loadBase(c echo.Context, g *models.Guest) (BaseData, erro
 	for _, b := range blocks {
 		cm[b.Key] = b
 	}
-	return newBase(c, cfg, cm, g), nil
+	theme := cfg[themeKey]
+	if theme == "" {
+		theme = "midnight-pool"
+	}
+	return newBase(c, cfg, cm, g, theme), nil
 }
 
 // GET / — spell login page
@@ -44,7 +48,7 @@ func (h *GuestHandler) SpellPage(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/me")
 	}
 
-	bd, err := h.loadBase(c, nil)
+	bd, err := h.loadBase(c, nil, "theme_login")
 	if err != nil {
 		return err
 	}
@@ -63,7 +67,7 @@ func (h *GuestHandler) Login(c echo.Context) error {
 
 	guest, err := h.guests.FindByCode(code)
 	if err != nil {
-		bd, _ := h.loadBase(c, nil)
+		bd, _ := h.loadBase(c, nil, "theme_login")
 		return c.Render(http.StatusOK, "spell.html", map[string]interface{}{
 			"Base":         bd,
 			"PrefillSpell": "",
@@ -91,7 +95,7 @@ func (h *GuestHandler) Me(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
 
-	bd, err := h.loadBase(c, guest)
+	bd, err := h.loadBase(c, guest, "theme_me")
 	if err != nil {
 		return err
 	}
@@ -104,7 +108,7 @@ func (h *GuestHandler) RSVPForm(c echo.Context) error {
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
-	bd, err := h.loadBase(c, guest)
+	bd, err := h.loadBase(c, guest, "theme_me")
 	if err != nil {
 		return err
 	}
@@ -184,7 +188,7 @@ func (h *GuestHandler) Confirmed(c echo.Context) error {
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
-	bd, err := h.loadBase(c, guest)
+	bd, err := h.loadBase(c, guest, "theme_me")
 	if err != nil {
 		return err
 	}

@@ -138,14 +138,16 @@ type BaseData struct {
 	Guest   *models.Guest
 	Config  map[string]string
 	Content map[string]models.ContentBlock
+	Theme   string
 }
 
-func newBase(c echo.Context, cfg map[string]string, content map[string]models.ContentBlock, g *models.Guest) BaseData {
+func newBase(c echo.Context, cfg map[string]string, content map[string]models.ContentBlock, g *models.Guest, theme string) BaseData {
 	return BaseData{
 		Lang:    getLang(c),
 		Guest:   g,
 		Config:  cfg,
 		Content: content,
+		Theme:   theme,
 	}
 }
 

@@ -22,68 +22,20 @@
 
   <div class="me-hero-line"></div>
 
-  {{/* Content sections */}}
+  {{/* General content (markdown) */}}
+  {{with content .Base.Content "general" .Base.Lang}}
   <div class="me-content">
-
-    {{/* Event description */}}
-    {{with content .Base.Content "event_description" .Base.Lang}}
-    <div class="content-card full-width reveal">
-      <div class="content-card-label">Info</div>
+    <div class="content-card content-body full-width reveal">
       {{.}}
     </div>
-    {{end}}
-
-    {{/* What to expect */}}
-    {{with content .Base.Content "what_to_expect" .Base.Lang}}
-    <div class="content-card reveal">
-      <div class="content-card-label">
-        {{if eq $.Base.Lang "en"}}What to expect{{else}}Was erwartet euch{{end}}
-      </div>
-      {{.}}
-    </div>
-    {{end}}
-
-    {{/* Kids section */}}
-    {{with content .Base.Content "kids_section" .Base.Lang}}
-    <div class="content-card kids-card reveal">
-      <div class="content-card-label">
-        {{if eq $.Base.Lang "en"}}For the kids{{else}}Für die Kids{{end}}
-      </div>
-      {{.}}
-    </div>
-    {{end}}
-
-    {{/* Special thing */}}
-    {{with content .Base.Content "special_thing" .Base.Lang}}
-    <div class="content-card full-width reveal">
-      <div class="content-card-label">
-        {{if eq $.Base.Lang "en"}}Something special{{else}}Das Besondere{{end}}
-      </div>
-      {{.}}
-    </div>
-    {{end}}
-
-    {{/* Charity */}}
-    {{if or (content .Base.Content "charity_name" .Base.Lang) (cfg .Base.Config "charity_url")}}
-    <div class="content-card charity-card full-width reveal">
-      <div class="content-card-label">{{t .Base.Lang "charity.cta"}}</div>
-      {{with content .Base.Content "charity_name" .Base.Lang}}<p><strong>{{.}}</strong></p>{{end}}
-      {{with content .Base.Content "charity_description" .Base.Lang}}{{.}}{{end}}
-      {{with cfg .Base.Config "charity_url"}}
-        <p style="margin-top:1rem">
-          <a href="{{.}}" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:0.75rem;padding:0.6rem 1.25rem">
-            {{t $.Base.Lang "charity.cta"}} →
-          </a>
-        </p>
-      {{end}}
-    </div>
-    {{end}}
-
   </div>
+  {{end}}
 
   {{/* RSVP section */}}
   <section class="rsvp-section">
-    {{with content .Base.Content "rsvp_note" .Base.Lang}}<p class="rsvp-label">{{.}}</p>{{end}}
+    {{with content .Base.Content "rsvp_note" .Base.Lang}}
+    <div class="rsvp-note reveal">{{.}}</div>
+    {{end}}
 
     {{if .Base.Guest.RSVPAt}}
       {{/* Already RSVPed */}}
@@ -101,13 +53,6 @@
       </div>
     {{end}}
   </section>
-
-  {{/* Footer */}}
-  {{with content .Base.Content "footer_note" .Base.Lang}}
-  <footer style="text-align:center;padding:2rem;font-size:0.8rem;color:var(--text-dim)">
-    {{.}}
-  </footer>
-  {{end}}
 </main>
 
 {{template "_scripts_guest" .}}

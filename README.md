@@ -1,5 +1,8 @@
 # Party 2026
 
+[![Docker Image](https://github.com/vetterfl/Party2026/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/vetterfl/Party2026/actions/workflows/docker-image.yml)
+[![License: MIT](https://img.shields.io/github/license/vetterfl/Party2026)](LICENSE)
+
 Self-hosted invitation + RSVP web app for a personal summer party. Each guest
 gets a unique "spell" code, lands on a personalised page, RSVPs, optionally
 opts in to a newsletter. The host manages the guest list, content blocks,

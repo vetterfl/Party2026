@@ -13,6 +13,7 @@
 
   {{/* Add guest */}}
   <form class="inline-form" method="POST" action="/admin/guests">
+    {{template "_csrf" $}}
     <input type="text" name="name" placeholder="Guest name…" required>
     <button type="submit" class="btn btn-primary btn-sm">Add Guest</button>
   </form>
@@ -73,6 +74,7 @@
               <a href="/admin/guests/{{.Guest.ID}}/card" class="btn btn-outline btn-xs" title="Print card" target="_blank">Card</a>
               <a href="/admin/guests/{{.Guest.ID}}/edit" class="btn btn-outline btn-xs">Edit</a>
               <form method="POST" action="/admin/guests/{{.Guest.ID}}/delete" style="display:inline">
+                {{template "_csrf" $}}
                 <button type="submit" class="btn btn-danger btn-xs"
                   data-confirm="Delete {{.Guest.Name}}?">✕</button>
               </form>

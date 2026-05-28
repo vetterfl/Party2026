@@ -71,7 +71,7 @@
   <div class="footer">
     <p>
       {{if eq .Lang "en"}}Changed your mind?{{else}}Meinung geändert?{{end}}
-      <a href="{{index .Config "base_url"}}/me/rsvp">
+      <a href="{{.BaseURL}}/me/rsvp">
         {{if eq .Lang "en"}}Update your RSVP{{else}}Anmeldung ändern{{end}}
       </a>
       &nbsp;·&nbsp;

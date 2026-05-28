@@ -20,6 +20,7 @@
   {{end}}
 
   <form class="admin-form wide" method="POST" action="/admin/newsletter">
+    {{template "_csrf" $}}
     <div class="field">
       <label for="subject">Subject</label>
       <input type="text" id="subject" name="subject" placeholder="Hi {name} — Summer Party Update…" required>

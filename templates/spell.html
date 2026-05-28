@@ -7,10 +7,12 @@
   <nav class="nav" style="position:fixed;top:0;right:0;padding:1.25rem 2rem;z-index:100;">
     <div class="nav-lang">
       <form method="POST" action="/lang" style="display:contents">
+        {{template "_csrf" $}}
         <input type="hidden" name="lang" value="de">
         <button type="submit" class="lang-btn{{if eq .Base.Lang "de"}} active{{end}}">DE</button>
       </form>
       <form method="POST" action="/lang" style="display:contents">
+        {{template "_csrf" $}}
         <input type="hidden" name="lang" value="en">
         <button type="submit" class="lang-btn{{if eq .Base.Lang "en"}} active{{end}}">EN</button>
       </form>
@@ -27,6 +29,7 @@
   </div>
 
   <form class="spell-form" id="spell-form" method="POST" action="/login">
+    {{template "_csrf" $}}
     <div class="spell-input-wrap">
       <input
         id="spell-input"

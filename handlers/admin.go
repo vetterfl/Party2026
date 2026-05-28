@@ -47,13 +47,22 @@ func (h *AdminHandler) LoginPage(c echo.Context) error {
 	})
 }
 
+// dummyBcryptHash is a precomputed bcrypt hash of an unguessable password.
+// Used so failed lookups still incur a bcrypt round, preventing username
+// enumeration via response-time differences.
+const dummyBcryptHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
+
 // POST /admin/login
 func (h *AdminHandler) LoginSubmit(c echo.Context) error {
 	user := c.FormValue("username")
 	pass := c.FormValue("password")
 
 	admin, err := h.admins.FindByUsername(user)
-	if err != nil || bcrypt.CompareHashAndPassword([]byte(admin.PasswordHash), []byte(pass)) != nil {
+	hash := dummyBcryptHash
+	if err == nil {
+		hash = admin.PasswordHash
+	}
+	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(pass)) != nil || err != nil {
 		return c.Render(http.StatusOK, "login.html", map[string]interface{}{
 			"Error": true,
 		})
@@ -260,12 +269,12 @@ func (h *AdminHandler) ExportCSV(c echo.Context) error {
 		if g.RSVPAt != nil {
 			rsvpAt = g.RSVPAt.Format(time.RFC3339)
 		}
-		_ = w.Write([]string{
+		_ = w.Write(csvSafeRow(
 			g.Name, g.Code, g.Status,
 			derefStr(g.Email), derefStr(g.PhoneE164), boolStr(g.PlusOne), derefStr(g.PlusOneName),
 			fmt.Sprint(g.Children), derefStr(g.Song), derefStr(g.Comment),
 			boolStr(g.Newsletter), rsvpAt,
-		})
+		))
 	}
 	w.Flush()
 
@@ -286,6 +295,28 @@ func boolStr(b bool) string {
 		return "yes"
 	}
 	return "no"
+}
+
+// csvSafeRow prefixes a single quote to cells starting with =, +, -, @, tab
+// or carriage return. Mitigates spreadsheet formula injection when CSV is
+// opened in Excel/Sheets/LibreOffice.
+func csvSafeRow(cells ...string) []string {
+	out := make([]string, len(cells))
+	for i, c := range cells {
+		out[i] = csvSafeCell(c)
+	}
+	return out
+}
+
+func csvSafeCell(s string) string {
+	if s == "" {
+		return s
+	}
+	switch s[0] {
+	case '=', '+', '-', '@', '\t', '\r':
+		return "'" + s
+	}
+	return s
 }
 
 func (h *AdminHandler) guestInviteRows(guests []models.Guest, cfg map[string]string) []guestInviteRow {

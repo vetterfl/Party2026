@@ -1,15 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/time/rate"
 
 	embedded "party2026"
 	"party2026/handlers"
@@ -63,22 +67,28 @@ func main() {
 	e := echo.New()
 	e.HideBanner = true
 	e.Renderer = renderer
-	e.Use(echomw.Logger())
-	e.Use(echomw.Recover())
 
-	// Static assets
+	// Trust X-Forwarded-For when behind nginx (single proxy hop).
+	e.IPExtractor = echo.ExtractIPFromXFFHeader()
+
+	e.Use(loggerMiddleware())
+	e.Use(echomw.Recover())
+	e.Use(echomw.Secure())
+	e.Use(csrfMiddleware())
+
+	// Static assets — exempt from middleware that does not run on GETs anyway.
 	assetsSub, _ := fs.Sub(embedded.Assets, "assets")
 	e.GET("/assets/*", echo.WrapHandler(
 		http.StripPrefix("/assets/", http.FileServer(http.FS(assetsSub))),
 	))
 
-	// Enumerate installed themes from embedded assets
+	// Enumerate installed themes from embedded assets.
 	var themes []string
 	if themesFS, err := fs.Sub(embedded.Assets, "assets/themes"); err == nil {
 		if entries, err := fs.ReadDir(themesFS, "."); err == nil {
-			for _, e := range entries {
-				if e.IsDir() {
-					themes = append(themes, e.Name())
+			for _, ent := range entries {
+				if ent.IsDir() {
+					themes = append(themes, ent.Name())
 				}
 			}
 		}
@@ -91,9 +101,11 @@ func main() {
 	cfgh := handlers.NewConfigHandler(configStore, themes)
 	auh := handlers.NewAdminUsersHandler(adminStore)
 
+	loginRL := loginRateLimiter()
+
 	// Guest routes
 	e.GET("/", gh.SpellPage)
-	e.POST("/login", gh.Login)
+	e.POST("/login", gh.Login, loginRL)
 	e.GET("/logout", gh.Logout)
 	e.POST("/lang", gh.SetLang)
 	e.GET("/unsubscribe", gh.Unsubscribe)
@@ -107,7 +119,7 @@ func main() {
 
 	// Admin routes
 	e.GET("/admin/login", ah.LoginPage)
-	e.POST("/admin/login", ah.LoginSubmit)
+	e.POST("/admin/login", ah.LoginSubmit, loginRL)
 	e.GET("/admin/logout", ah.Logout)
 
 	admin := e.Group("/admin", mw.RequireAdmin)
@@ -134,6 +146,60 @@ func main() {
 	addr := ":" + port()
 	log.Printf("listening on %s", addr)
 	log.Fatal(e.Start(addr))
+}
+
+// csrfMiddleware applies CSRF token validation on unsafe methods. Tokens are
+// stored in a cookie (_csrf) and required in the `_csrf` form field. The token
+// value is exposed to templates via context key "csrf".
+func csrfMiddleware() echo.MiddlewareFunc {
+	cfg := echomw.DefaultCSRFConfig
+	cfg.TokenLookup = "form:_csrf,header:X-CSRF-Token"
+	cfg.CookiePath = "/"
+	cfg.CookieHTTPOnly = true
+	cfg.CookieSameSite = http.SameSiteLaxMode
+	cfg.CookieSecure = isProduction()
+	cfg.ContextKey = "csrf"
+	return echomw.CSRFWithConfig(cfg)
+}
+
+// loginRateLimiter throttles login attempts per IP — 1 req/sec sustained,
+// burst of 10. Mitigates brute force on /login and /admin/login.
+func loginRateLimiter() echo.MiddlewareFunc {
+	return echomw.RateLimiterWithConfig(echomw.RateLimiterConfig{
+		Store: echomw.NewRateLimiterMemoryStoreWithConfig(
+			echomw.RateLimiterMemoryStoreConfig{
+				Rate:      rate.Limit(1),
+				Burst:     10,
+				ExpiresIn: 10 * time.Minute,
+			},
+		),
+		IdentifierExtractor: func(c echo.Context) (string, error) {
+			return c.RealIP(), nil
+		},
+		DenyHandler: func(c echo.Context, _ string, _ error) error {
+			return echo.NewHTTPError(http.StatusTooManyRequests, "Too many attempts, slow down.")
+		},
+	})
+}
+
+// loggerMiddleware logs each request but redacts the `spell` query parameter
+// (a guest's login code) to avoid leaking secrets into access logs.
+func loggerMiddleware() echo.MiddlewareFunc {
+	return echomw.LoggerWithConfig(echomw.LoggerConfig{
+		Format: `{"time":"${time_rfc3339}","remote_ip":"${remote_ip}","method":"${method}","uri":"${custom}","status":${status},"latency":"${latency_human}"}` + "\n",
+		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
+			u := *c.Request().URL
+			if q := u.Query(); q.Get("spell") != "" {
+				q.Set("spell", "REDACTED")
+				u.RawQuery = q.Encode()
+			}
+			return buf.WriteString(u.RequestURI())
+		},
+	})
+}
+
+func isProduction() bool {
+	return strings.EqualFold(os.Getenv("GO_ENV"), "production")
 }
 
 func port() string {

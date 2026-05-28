@@ -13,6 +13,7 @@
   </div>
 
   <form class="admin-form wide" method="POST" action="/admin/content/{{.Block.Key}}">
+    {{template "_csrf" $}}
     <div class="field">
       <label for="body_de">Deutsch (DE)</label>
       <textarea id="body_de" name="body_de" rows="10" placeholder="Markdown supported…">{{.Block.BodyDE}}</textarea>

@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yuin/goldmark"
 	"party2026/locales"
+	mw "party2026/middleware"
 	"party2026/models"
 )
 
@@ -131,8 +132,16 @@ func NewRenderer(tplFS fs.FS) (*Renderer, error) {
 	return &Renderer{templates: tmpl}, nil
 }
 
-// Render implements echo.Renderer
+// Render implements echo.Renderer. Injects CSRFToken into map-shaped data so
+// templates can render a hidden _csrf field via `_csrf_input`.
 func (r *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	if m, ok := data.(map[string]interface{}); ok {
+		if _, exists := m["CSRFToken"]; !exists {
+			if tok, ok := c.Get("csrf").(string); ok {
+				m["CSRFToken"] = tok
+			}
+		}
+	}
 	return r.templates.ExecuteTemplate(w, name, data)
 }
 
@@ -147,18 +156,10 @@ type BaseData struct {
 
 func newBase(c echo.Context, cfg map[string]string, content map[string]models.ContentBlock, g *models.Guest, theme string) BaseData {
 	return BaseData{
-		Lang:    getLang(c),
+		Lang:    mw.GetLang(c),
 		Guest:   g,
 		Config:  cfg,
 		Content: content,
 		Theme:   theme,
 	}
-}
-
-func getLang(c echo.Context) string {
-	cookie, err := c.Cookie("lang")
-	if err == nil && (cookie.Value == "en" || cookie.Value == "de") {
-		return cookie.Value
-	}
-	return "de"
 }

@@ -25,19 +25,19 @@ type Mailer struct {
 }
 
 func NewMailer(tplFS fs.FS, baseURL string) (*Mailer, error) {
-	funcMap := template.FuncMap{
-		"deref": func(s *string) string {
-			if s == nil {
-				return ""
-			}
-			return *s
-		},
-	}
+	funcMap := template.FuncMap{"deref": derefStringPtr}
 	tmpl, err := template.New("").Funcs(funcMap).ParseFS(tplFS, "email/*.html")
 	if err != nil {
 		return nil, err
 	}
 	return &Mailer{tmpl: tmpl, baseURL: baseURL}, nil
+}
+
+func derefStringPtr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
 
 func (m *Mailer) SendConfirmation(g *models.Guest, cfg map[string]string, lang string) {
@@ -55,6 +55,7 @@ func (m *Mailer) SendConfirmation(g *models.Guest, cfg map[string]string, lang s
 		"Guest":    g,
 		"Lang":     lang,
 		"Config":   cfg,
+		"BaseURL":  m.baseURL,
 		"UnsubURL": m.baseURL + "/unsubscribe?token=" + m.UnsubToken(g.ID),
 	})
 

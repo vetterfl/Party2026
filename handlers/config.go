@@ -34,7 +34,7 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 	keys := []string{
 		"party_date", "party_time_start",
 		"party_name_de", "party_name_en",
-		"rsvp_deadline", "charity_name", "charity_url",
+		"rsvp_deadline",
 		"smtp_from_name", "invite_message_de", "invite_message_en",
 	}
 	for _, k := range keys {

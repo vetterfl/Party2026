@@ -13,6 +13,7 @@
   {{end}}
 
   <form class="admin-form" method="POST" action="/admin/config">
+    {{template "_csrf" $}}
 
     <div class="field-row">
       <div class="field">
@@ -71,17 +72,6 @@
       <div class="field">
         <label for="calendar_description_en">Calendar Description (EN)</label>
         <textarea id="calendar_description_en" name="calendar_description_en" rows="2">{{index .Config "calendar_description_en"}}</textarea>
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label for="charity_name">Charity Name</label>
-        <input type="text" id="charity_name" name="charity_name" value="{{index .Config "charity_name"}}" placeholder="optional">
-      </div>
-      <div class="field">
-        <label for="charity_url">Charity URL</label>
-        <input type="text" id="charity_url" name="charity_url" value="{{index .Config "charity_url"}}" placeholder="https://…">
       </div>
     </div>
 

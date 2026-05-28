@@ -251,9 +251,5 @@ func (h *GuestHandler) SetLang(c echo.Context) error {
 	cookie.Path = "/"
 	cookie.MaxAge = 86400 * 365
 	c.SetCookie(cookie)
-	ref := c.Request().Referer()
-	if ref == "" {
-		ref = "/"
-	}
-	return c.Redirect(http.StatusSeeOther, ref)
+	return c.Redirect(http.StatusSeeOther, middleware.SafeReferer(c, "/"))
 }

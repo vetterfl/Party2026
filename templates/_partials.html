@@ -14,10 +14,12 @@
 <nav class="nav">
   <div class="nav-lang">
     <form method="POST" action="/lang" style="display:contents">
+      {{template "_csrf" $}}
       <input type="hidden" name="lang" value="de">
       <button type="submit" class="lang-btn{{if eq .Base.Lang "de"}} active{{end}}">DE</button>
     </form>
     <form method="POST" action="/lang" style="display:contents">
+      {{template "_csrf" $}}
       <input type="hidden" name="lang" value="en">
       <button type="submit" class="lang-btn{{if eq .Base.Lang "en"}} active{{end}}">EN</button>
     </form>
@@ -65,3 +67,5 @@
 {{define "_scripts_guest"}}
 <script src="/assets/themes/{{.Base.Theme}}/theme.js"></script>
 {{end}}
+
+{{define "_csrf"}}<input type="hidden" name="_csrf" value="{{.CSRFToken}}">{{end}}

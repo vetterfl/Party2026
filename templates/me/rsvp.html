@@ -8,6 +8,7 @@
   <p class="rsvp-page-subtitle">— {{.Base.Guest.Name}}</p>
 
   <form class="form-card" id="rsvp-form" method="POST" action="/me/rsvp">
+    {{template "_csrf" $}}
 
     {{/* Attending? */}}
     <div class="form-field">

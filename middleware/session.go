@@ -1,8 +1,11 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
@@ -14,24 +17,55 @@ const (
 	AdminSessionName = "admin_session"
 	AdminIDKey       = "admin_id"
 	LangCookie       = "lang"
+
+	guestSessionMaxAge = 86400 * 30 // 30 days
+	adminSessionMaxAge = 86400      // 24 hours
 )
 
-var store *sessions.CookieStore
+var (
+	store      *sessions.CookieStore
+	cookieOpts sessions.Options
+)
 
 func InitStore() {
 	secret := os.Getenv("SESSION_SECRET")
+	if isProduction() {
+		if secret == "" || strings.HasPrefix(secret, "change-this") {
+			log.Fatal("SESSION_SECRET must be set (>=32 random bytes hex) in production")
+		}
+	}
 	if secret == "" {
 		secret = "dev-secret-change-in-production-please"
 	}
 	store = sessions.NewCookieStore([]byte(secret))
-	store.Options = &sessions.Options{
+	cookieOpts = sessions.Options{
 		Path:     "/",
-		MaxAge:   86400 * 30,
 		HttpOnly: true,
+		Secure:   isProduction(),
 		SameSite: http.SameSiteLaxMode,
+	}
+	store.Options = &sessions.Options{
+		Path:     cookieOpts.Path,
+		MaxAge:   guestSessionMaxAge,
+		HttpOnly: cookieOpts.HttpOnly,
+		Secure:   cookieOpts.Secure,
+		SameSite: cookieOpts.SameSite,
 	}
 }
 
+func isProduction() bool {
+	return strings.EqualFold(os.Getenv("GO_ENV"), "production")
+}
+
+func sessionOptions(maxAge int) *sessions.Options {
+	return &sessions.Options{
+		Path:     cookieOpts.Path,
+		MaxAge:   maxAge,
+		HttpOnly: cookieOpts.HttpOnly,
+		Secure:   cookieOpts.Secure,
+		SameSite: cookieOpts.SameSite,
+	}
+}
 
 func GetGuestID(c echo.Context) string {
 	sess, err := store.Get(c.Request(), GuestSessionName)
@@ -47,6 +81,7 @@ func SetGuestID(c echo.Context, id string) error {
 	if err != nil {
 		return err
 	}
+	sess.Options = sessionOptions(guestSessionMaxAge)
 	sess.Values[GuestIDKey] = id
 	return sess.Save(c.Request(), c.Response().Writer)
 }
@@ -56,7 +91,7 @@ func ClearGuestSession(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	sess.Options.MaxAge = -1
+	sess.Options = sessionOptions(-1)
 	return sess.Save(c.Request(), c.Response().Writer)
 }
 
@@ -78,6 +113,7 @@ func SetAdminAuthed(c echo.Context, adminID string) error {
 	if err != nil {
 		return err
 	}
+	sess.Options = sessionOptions(adminSessionMaxAge)
 	sess.Values[AdminIDKey] = adminID
 	return sess.Save(c.Request(), c.Response().Writer)
 }
@@ -87,7 +123,7 @@ func ClearAdminSession(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	sess.Options.MaxAge = -1
+	sess.Options = sessionOptions(-1)
 	return sess.Save(c.Request(), c.Response().Writer)
 }
 
@@ -99,7 +135,25 @@ func GetLang(c echo.Context) string {
 	return "de"
 }
 
-// RequireGuest middleware — redirects to / if no guest session
+// SafeReferer returns the Referer path when the Referer host matches the
+// request host. Otherwise returns fallback. Prevents open-redirect via Referer.
+func SafeReferer(c echo.Context, fallback string) string {
+	ref := c.Request().Referer()
+	if ref == "" {
+		return fallback
+	}
+	u, err := url.Parse(ref)
+	if err != nil || u.Host != c.Request().Host {
+		return fallback
+	}
+	path := u.RequestURI()
+	if path == "" || !strings.HasPrefix(path, "/") {
+		return fallback
+	}
+	return path
+}
+
+// RequireGuest redirects to / if no guest session.
 func RequireGuest(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if GetGuestID(c) == "" {
@@ -109,7 +163,7 @@ func RequireGuest(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// RequireAdmin middleware — redirects to /admin/login if not authed
+// RequireAdmin redirects to /admin/login if not authed.
 func RequireAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if !IsAdminAuthed(c) {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -13,7 +14,7 @@ import (
 func Open(migrationsFS fs.FS) (*sqlx.DB, error) {
 	path := DBPath()
 
-	if err := os.MkdirAll(pathDir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, fmt.Errorf("create db dir: %w", err)
 	}
 
@@ -40,13 +41,4 @@ func DBPath() string {
 		return p
 	}
 	return "./data/party.db"
-}
-
-func pathDir(p string) string {
-	for i := len(p) - 1; i >= 0; i-- {
-		if p[i] == '/' {
-			return p[:i]
-		}
-	}
-	return "."
 }

@@ -21,6 +21,11 @@ import (
 func main() {
 	_ = godotenv.Load()
 
+	if len(os.Args) > 1 && os.Args[1] == "mailtest" {
+		runMailTest()
+		return
+	}
+
 	mw.InitStore()
 
 	db, err := models.Open(migrations.FS)
@@ -140,4 +145,31 @@ func port() string {
 		return p
 	}
 	return "3000"
+}
+
+func runMailTest() {
+	if len(os.Args) < 3 {
+		log.Fatalf("usage: %s mailtest <recipient@email.com>", os.Args[0])
+	}
+	to := os.Args[2]
+
+	host := os.Getenv("SMTP_HOST")
+	port := os.Getenv("SMTP_PORT")
+	if port == "" {
+		port = "587"
+	}
+	from := os.Getenv("SMTP_FROM")
+
+	log.Printf("SMTP host=%s port=%s from=%s", host, port, from)
+	log.Printf("Sending test email to %s…", to)
+
+	cfg := map[string]string{}
+	if name := os.Getenv("SMTP_FROM_NAME"); name != "" {
+		cfg["smtp_from_name"] = name
+	}
+
+	if err := handlers.SendTestMail(to, cfg); err != nil {
+		log.Fatalf("mail test failed: %v", err)
+	}
+	log.Println("mail test OK")
 }

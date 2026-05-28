@@ -66,9 +66,15 @@
   </div>
   {{end}}
 
-  {{/* Confirmation message from CMS */}}
-  {{with content .Base.Content "confirmation_message" .Base.Lang}}
-  <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7">{{.}}</div>
+  {{/* Confirmation message from CMS — separate body per RSVP decision */}}
+  {{if eq .Base.Guest.Status "accepted"}}
+    {{with content .Base.Content "confirmation_message_accepted" .Base.Lang}}
+    <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7">{{.}}</div>
+    {{end}}
+  {{else}}
+    {{with content .Base.Content "confirmation_message_declined" .Base.Lang}}
+    <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7">{{.}}</div>
+    {{end}}
   {{end}}
 
   <div class="confirmed-actions">

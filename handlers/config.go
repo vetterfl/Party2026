@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"golang.org/x/crypto/bcrypt"
 	"party2026/models"
 )
 
@@ -37,7 +36,6 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 		"party_name_de", "party_name_en",
 		"rsvp_deadline", "charity_name", "charity_url",
 		"smtp_from_name", "invite_message_de", "invite_message_en",
-		"admin_user",
 	}
 	for _, k := range keys {
 		if v := c.FormValue(k); v != "" {
@@ -61,14 +59,6 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 	for _, k := range []string{"theme_login", "theme_me"} {
 		if v := c.FormValue(k); v != "" {
 			_ = h.config.Set(k, v)
-		}
-	}
-
-	// Update password only if provided
-	if newPass := c.FormValue("admin_password"); newPass != "" {
-		hash, err := bcrypt.GenerateFromPassword([]byte(newPass), bcrypt.DefaultCost)
-		if err == nil {
-			_ = h.config.Set("admin_password_hash", string(hash))
 		}
 	}
 

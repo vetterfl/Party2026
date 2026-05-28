@@ -12,7 +12,7 @@ const (
 	GuestSessionName = "guest_session"
 	GuestIDKey       = "guest_id"
 	AdminSessionName = "admin_session"
-	AdminAuthedKey   = "admin_authed"
+	AdminIDKey       = "admin_id"
 	LangCookie       = "lang"
 )
 
@@ -60,21 +60,25 @@ func ClearGuestSession(c echo.Context) error {
 	return sess.Save(c.Request(), c.Response().Writer)
 }
 
-func IsAdminAuthed(c echo.Context) bool {
+func GetAdminID(c echo.Context) string {
 	sess, err := store.Get(c.Request(), AdminSessionName)
 	if err != nil {
-		return false
+		return ""
 	}
-	ok, _ := sess.Values[AdminAuthedKey].(bool)
-	return ok
+	id, _ := sess.Values[AdminIDKey].(string)
+	return id
 }
 
-func SetAdminAuthed(c echo.Context) error {
+func IsAdminAuthed(c echo.Context) bool {
+	return GetAdminID(c) != ""
+}
+
+func SetAdminAuthed(c echo.Context, adminID string) error {
 	sess, err := store.Get(c.Request(), AdminSessionName)
 	if err != nil {
 		return err
 	}
-	sess.Values[AdminAuthedKey] = true
+	sess.Values[AdminIDKey] = adminID
 	return sess.Save(c.Request(), c.Response().Writer)
 }
 

@@ -36,18 +36,9 @@ func main() {
 	guestStore := models.NewGuestStore(db)
 	configStore := models.NewConfigStore(db)
 	contentStore := models.NewContentStore(db)
+	adminStore := models.NewAdminStore(db)
 
-	// Bootstrap admin credentials from env (only if set)
-	if u := os.Getenv("ADMIN_USER"); u != "" {
-		_ = configStore.Set("admin_user", u)
-	}
-	if p := os.Getenv("ADMIN_PASSWORD"); p != "" {
-		hash, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
-		if err == nil {
-			_ = configStore.Set("admin_password_hash", string(hash))
-			log.Println("admin password updated from env")
-		}
-	}
+	bootstrapAdmin(adminStore)
 
 	baseURL := os.Getenv("BASE_URL")
 	if baseURL == "" {
@@ -94,10 +85,11 @@ func main() {
 	}
 
 	gh := handlers.NewGuestHandler(guestStore, configStore, contentStore, mailer)
-	ah := handlers.NewAdminHandler(guestStore, configStore, contentStore, mailer, baseURL)
+	ah := handlers.NewAdminHandler(guestStore, configStore, contentStore, adminStore, mailer, baseURL)
 	ch := handlers.NewContentHandler(contentStore)
 	nh := handlers.NewNewsletterHandler(guestStore, configStore, mailer)
 	cfgh := handlers.NewConfigHandler(configStore, themes)
+	auh := handlers.NewAdminUsersHandler(adminStore)
 
 	// Guest routes
 	e.GET("/", gh.SpellPage)
@@ -135,6 +127,9 @@ func main() {
 	admin.POST("/newsletter", nh.Send)
 	admin.GET("/config", cfgh.Page)
 	admin.POST("/config", cfgh.Save)
+	admin.GET("/admins", auh.List)
+	admin.POST("/admins", auh.Create)
+	admin.POST("/admins/:id/delete", auh.Delete)
 
 	addr := ":" + port()
 	log.Printf("listening on %s", addr)
@@ -146,6 +141,33 @@ func port() string {
 		return p
 	}
 	return "3000"
+}
+
+func bootstrapAdmin(store *models.AdminStore) {
+	u := os.Getenv("ADMIN_USER")
+	p := os.Getenv("ADMIN_PASSWORD")
+	if u == "" || p == "" {
+		return
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
+	if err != nil {
+		return
+	}
+	existing, err := store.FindByUsername(u)
+	if err == nil {
+		_ = store.UpdatePassword(existing.ID, string(hash))
+		log.Printf("admin password updated from env for %q", u)
+		return
+	}
+	count, err := store.Count()
+	if err != nil || count > 0 {
+		return
+	}
+	if _, err := store.Create(u, string(hash)); err != nil {
+		log.Printf("admin bootstrap failed: %v", err)
+		return
+	}
+	log.Printf("admin account created from env for %q", u)
 }
 
 func runMailTest() {

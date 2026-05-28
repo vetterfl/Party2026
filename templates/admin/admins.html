@@ -1,0 +1,62 @@
+{{template "_head_admin" .}}
+<body>
+<div class="admin-layout">
+{{template "_admin_topbar" .}}
+<main class="admin-main">
+
+  <div class="page-header">
+    <h1 class="page-title">Admins</h1>
+  </div>
+
+  {{if .Created}}
+  <div class="alert alert-success">Admin account created.</div>
+  {{end}}
+  {{if .Error}}
+  <div class="alert alert-error">{{.Error}}</div>
+  {{end}}
+
+  <form class="inline-form" method="POST" action="/admin/admins">
+    <input type="text" name="username" placeholder="Username…" required autocomplete="username">
+    <input type="password" name="password" placeholder="Password (min 8 chars)…" required minlength="8" autocomplete="new-password">
+    <button type="submit" class="btn btn-primary btn-sm">Add Admin</button>
+  </form>
+
+  <div class="table-wrap" style="margin-top:1.5rem">
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Admins}}
+        <tr>
+          <td class="name-col">
+            {{.Username}}{{if eq .ID $.SelfID}} <span class="badge badge-invited">you</span>{{end}}
+          </td>
+          <td style="white-space:nowrap;font-size:0.75rem">{{formatDate .CreatedAt}}</td>
+          <td>
+            {{if ne .ID $.SelfID}}
+            <form method="POST" action="/admin/admins/{{.ID}}/delete" style="display:inline" onsubmit="return confirm('Remove admin {{.Username}}?')">
+              <button type="submit" class="btn btn-outline btn-sm" style="color:#ff4d6d">Delete</button>
+            </form>
+            {{else}}
+            <span style="color:var(--muted);font-size:0.75rem">—</span>
+            {{end}}
+          </td>
+        </tr>
+        {{else}}
+        <tr>
+          <td colspan="3" style="color:var(--muted);padding:1.5rem">No admin accounts yet.</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+</body>
+</html>

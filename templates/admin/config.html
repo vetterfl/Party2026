@@ -126,20 +126,6 @@
     </div>
     {{end}}
 
-    <div style="height:1px;background:var(--border)"></div>
-
-    <div class="field-row">
-      <div class="field">
-        <label for="admin_user">Admin Username</label>
-        <input type="text" id="admin_user" name="admin_user" value="{{index .Config "admin_user"}}">
-      </div>
-      <div class="field">
-        <label for="admin_password">New Password</label>
-        <input type="password" id="admin_password" name="admin_password" placeholder="leave blank to keep">
-        <span class="form-hint">Stored as bcrypt hash.</span>
-      </div>
-    </div>
-
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Save Config</button>
     </div>

@@ -21,6 +21,7 @@ type AdminHandler struct {
 	guests  *models.GuestStore
 	config  *models.ConfigStore
 	content *models.ContentStore
+	admins  *models.AdminStore
 	mailer  *Mailer
 	baseURL string
 }
@@ -32,8 +33,8 @@ type guestInviteRow struct {
 	WhatsAppURL   string
 }
 
-func NewAdminHandler(g *models.GuestStore, cfg *models.ConfigStore, cnt *models.ContentStore, m *Mailer, baseURL string) *AdminHandler {
-	return &AdminHandler{guests: g, config: cfg, content: cnt, mailer: m, baseURL: baseURL}
+func NewAdminHandler(g *models.GuestStore, cfg *models.ConfigStore, cnt *models.ContentStore, admins *models.AdminStore, m *Mailer, baseURL string) *AdminHandler {
+	return &AdminHandler{guests: g, config: cfg, content: cnt, admins: admins, mailer: m, baseURL: baseURL}
 }
 
 // GET /admin/login
@@ -51,16 +52,14 @@ func (h *AdminHandler) LoginSubmit(c echo.Context) error {
 	user := c.FormValue("username")
 	pass := c.FormValue("password")
 
-	storedUser, _ := h.config.Get("admin_user")
-	storedHash, _ := h.config.Get("admin_password_hash")
-
-	if user != storedUser || bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(pass)) != nil {
+	admin, err := h.admins.FindByUsername(user)
+	if err != nil || bcrypt.CompareHashAndPassword([]byte(admin.PasswordHash), []byte(pass)) != nil {
 		return c.Render(http.StatusOK, "login.html", map[string]interface{}{
 			"Error": true,
 		})
 	}
 
-	_ = middleware.SetAdminAuthed(c)
+	_ = middleware.SetAdminAuthed(c, admin.ID)
 	return c.Redirect(http.StatusSeeOther, "/admin")
 }
 

@@ -96,10 +96,13 @@ func (h *AdminHandler) GuestList(c echo.Context) error {
 	filter := c.QueryParam("status")
 	var guests []models.Guest
 	var err error
-	if filter != "" {
-		guests, err = h.guests.ByStatus(filter)
-	} else {
+	switch filter {
+	case "":
 		guests, err = h.guests.All()
+	case "no_response":
+		guests, err = h.guests.ByNoResponse()
+	default:
+		guests, err = h.guests.ByStatus(filter)
 	}
 	if err != nil {
 		return err
@@ -148,7 +151,15 @@ func (h *AdminHandler) GuestUpdate(c echo.Context) error {
 	}
 
 	g.Name = strings.TrimSpace(c.FormValue("name"))
-	g.Status = c.FormValue("status")
+	status := c.FormValue("status")
+	if !models.ValidGuestStatus(status) {
+		return c.Render(http.StatusBadRequest, "guest_edit.html", map[string]interface{}{
+			"Guest":   g,
+			"BaseURL": h.baseURL,
+			"Error":   "Invalid status.",
+		})
+	}
+	g.Status = status
 
 	if email := strings.TrimSpace(c.FormValue("email")); email != "" {
 		g.Email = &email

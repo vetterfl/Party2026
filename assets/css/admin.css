@@ -213,11 +213,11 @@ tbody tr:last-child td { border-bottom: none; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.badge-added      { background: rgba(100,100,100,0.12); color: var(--text-muted); }
 .badge-invited    { background: rgba(58,123,213,0.15); color: #7ab3f0; }
 .badge-accepted   { background: rgba(0,212,170,0.12); color: var(--accent); }
 .badge-declined   { background: rgba(255,77,109,0.12); color: #ff4d6d; }
 .badge-tentative  { background: rgba(245,158,11,0.12); color: var(--warn); }
-.badge-no_response{ background: rgba(100,100,100,0.15); color: var(--text-dim); }
 
 /* Action row */
 .action-group {

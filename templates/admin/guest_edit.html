@@ -29,11 +29,11 @@
     <div class="field">
       <label for="status">Status</label>
       <select id="status" name="status">
+        <option value="added"       {{if eq .Guest.Status "added"}}selected{{end}}>Added</option>
         <option value="invited"     {{if eq .Guest.Status "invited"}}selected{{end}}>Invited</option>
         <option value="accepted"    {{if eq .Guest.Status "accepted"}}selected{{end}}>Accepted</option>
         <option value="declined"    {{if eq .Guest.Status "declined"}}selected{{end}}>Declined</option>
         <option value="tentative"   {{if eq .Guest.Status "tentative"}}selected{{end}}>Tentative</option>
-        <option value="no_response" {{if eq .Guest.Status "no_response"}}selected{{end}}>No Response</option>
       </select>
     </div>
 

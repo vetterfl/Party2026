@@ -20,6 +20,7 @@
   {{/* Filter tabs */}}
   <div class="filter-tabs">
     <a href="/admin/guests" class="filter-tab{{if eq .Filter ""}} active{{end}}">All ({{len .Guests}})</a>
+    <a href="/admin/guests?status=added"       class="filter-tab{{if eq .Filter "added"}} active{{end}}">Added</a>
     <a href="/admin/guests?status=invited"     class="filter-tab{{if eq .Filter "invited"}} active{{end}}">Invited</a>
     <a href="/admin/guests?status=accepted"    class="filter-tab{{if eq .Filter "accepted"}} active{{end}}">Accepted</a>
     <a href="/admin/guests?status=declined"    class="filter-tab{{if eq .Filter "declined"}} active{{end}}">Declined</a>

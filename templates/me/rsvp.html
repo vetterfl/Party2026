@@ -18,7 +18,7 @@
         <div class="radio-tile">
           <input type="radio" name="attending" id="attending-yes" value="yes"
             {{if eq .Base.Guest.Status "accepted"}}checked{{end}}
-            {{if eq .Base.Guest.Status "invited"}}checked{{end}}>
+            {{if or (eq .Base.Guest.Status "invited") (eq .Base.Guest.Status "added")}}checked{{end}}>
           <label class="radio-tile-label" for="attending-yes">
             ✓ {{t .Base.Lang "rsvp.attending_yes"}}
           </label>

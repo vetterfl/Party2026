@@ -62,12 +62,33 @@ func (s *GuestStore) ByStatus(status string) ([]Guest, error) {
 	return gs, err
 }
 
+// ByNoResponse returns guests who have not RSVP'd accepted, declined, or tentative.
+func (s *GuestStore) ByNoResponse() ([]Guest, error) {
+	var gs []Guest
+	err := s.db.Select(&gs,
+		`SELECT * FROM guests WHERE status NOT IN ('accepted', 'declined', 'tentative') ORDER BY name`)
+	return gs, err
+}
+
+var validGuestStatuses = map[string]struct{}{
+	"added":     {},
+	"invited":   {},
+	"accepted":  {},
+	"declined":  {},
+	"tentative": {},
+}
+
+func ValidGuestStatus(status string) bool {
+	_, ok := validGuestStatuses[strings.ToLower(strings.TrimSpace(status))]
+	return ok
+}
+
 func (s *GuestStore) Create(name string) (*Guest, error) {
 	g := &Guest{
 		ID:        uuid.New().String(),
 		Code:      generateCode(6),
 		Name:      name,
-		Status:    "invited",
+		Status:    "added",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -99,10 +120,12 @@ func (s *GuestStore) Delete(id string) error {
 }
 
 type Stats struct {
+	Added      int
+	Invited    int
 	Accepted   int
 	Declined   int
-	Pending    int
-	NoResponse int
+	Tentative  int
+	NoResponse int // computed: guests without an RSVP (added + invited)
 	TotalHeads int // guests + plus ones + children
 }
 
@@ -125,16 +148,19 @@ func (s *GuestStore) Stats() (Stats, error) {
 		}
 		st.TotalHeads += n + po + ch
 		switch status {
+		case "added":
+			st.Added = n
+		case "invited":
+			st.Invited = n
 		case "accepted":
 			st.Accepted = n
 		case "declined":
 			st.Declined = n
-		case "invited", "tentative":
-			st.Pending += n
-		case "no_response":
-			st.NoResponse = n
+		case "tentative":
+			st.Tentative = n
 		}
 	}
+	st.NoResponse = st.Added + st.Invited
 	return st, nil
 }
 

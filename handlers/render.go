@@ -70,18 +70,18 @@ func NewRenderer(tplFS fs.FS) (*Renderer, error) {
 		"statusLabel": func(lang, status string) string {
 			labels := map[string]map[string]string{
 				"de": {
-					"invited":     "Eingeladen",
-					"accepted":    "Zugesagt",
-					"declined":    "Abgesagt",
-					"tentative":   "Vielleicht",
-					"no_response": "Keine Antwort",
+					"added":     "Hinzugefügt",
+					"invited":   "Eingeladen",
+					"accepted":  "Zugesagt",
+					"declined":  "Abgesagt",
+					"tentative": "Vielleicht",
 				},
 				"en": {
-					"invited":     "Invited",
-					"accepted":    "Accepted",
-					"declined":    "Declined",
-					"tentative":   "Tentative",
-					"no_response": "No Response",
+					"added":     "Added",
+					"invited":   "Invited",
+					"accepted":  "Accepted",
+					"declined":  "Declined",
+					"tentative": "Tentative",
 				},
 			}
 			if l, ok := labels[lang]; ok {
@@ -93,14 +93,14 @@ func NewRenderer(tplFS fs.FS) (*Renderer, error) {
 		},
 		"statusClass": func(status string) string {
 			switch status {
+			case "added":
+				return "status-added"
 			case "accepted":
 				return "status-accepted"
 			case "declined":
 				return "status-declined"
 			case "tentative":
 				return "status-tentative"
-			case "no_response":
-				return "status-no-response"
 			default:
 				return "status-invited"
 			}

@@ -111,6 +111,7 @@ func main() {
 	me.GET("/rsvp", gh.RSVPForm)
 	me.POST("/rsvp", gh.RSVPSubmit)
 	me.GET("/confirmed", gh.Confirmed)
+	me.GET("/calendar.ics", gh.CalendarICS)
 
 	// Admin routes
 	e.GET("/admin/login", ah.LoginPage)

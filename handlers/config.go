@@ -45,6 +45,18 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 		}
 	}
 
+	if c.FormValue("calendar_enabled") == "1" {
+		_ = h.config.Set("calendar_enabled", "1")
+	} else {
+		_ = h.config.Set("calendar_enabled", "0")
+	}
+	for _, k := range []string{
+		"calendar_time_end", "calendar_location",
+		"calendar_description_de", "calendar_description_en",
+	} {
+		_ = h.config.Set(k, c.FormValue(k))
+	}
+
 	// Theme selectors — allow empty selection (keep existing)
 	for _, k := range []string{"theme_login", "theme_me"} {
 		if v := c.FormValue(k); v != "" {

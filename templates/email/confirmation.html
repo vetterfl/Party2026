@@ -61,15 +61,6 @@
       {{end}}
     </div>
 
-    {{if index .Config "charity_url"}}
-    <p style="margin-top:1.5rem">
-      {{if eq .Lang "en"}}Instead of gifts, please consider a small donation:{{else}}Statt Geschenken freuen wir uns über eine kleine Spende:{{end}}
-    </p>
-    <a href="{{index .Config "charity_url"}}" class="btn">
-      {{if eq .Lang "en"}}Donate{{else}}Jetzt spenden{{end}}
-    </a>
-    {{end}}
-
     {{else}}{{/* declined */}}
     <p class="highlight">
       {{if eq .Lang "en"}}No worries — hope to see you next time!{{else}}Schade, vielleicht beim nächsten Mal!{{end}}

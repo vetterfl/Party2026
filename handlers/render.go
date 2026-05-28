@@ -113,6 +113,10 @@ func NewRenderer(tplFS fs.FS) (*Renderer, error) {
 			}
 			return "–"
 		},
+		"cfgEnabled": func(m map[string]string, key string) bool {
+			v := m[key]
+			return v == "1" || strings.EqualFold(v, "true")
+		},
 	}
 
 	tmpl, err := template.New("").Funcs(funcMap).ParseFS(tplFS,

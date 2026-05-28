@@ -41,6 +41,39 @@
       <input type="date" id="rsvp_deadline" name="rsvp_deadline" value="{{index .Config "rsvp_deadline"}}">
     </div>
 
+    <div style="height:1px;background:var(--border)"></div>
+
+    <div class="field">
+      <label class="form-check" style="flex-direction:row;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;font-weight:500;color:var(--text)">
+        <input type="checkbox" name="calendar_enabled" value="1"{{if cfgEnabled .Config "calendar_enabled"}} checked{{end}}>
+        Enable calendar download on RSVP confirmation
+      </label>
+      <span class="form-hint">Uses party date, start time, and name below. Shown to guests who accepted.</span>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="calendar_time_end">Calendar End Time</label>
+        <input type="text" id="calendar_time_end" name="calendar_time_end" value="{{index .Config "calendar_time_end"}}" placeholder="23:00">
+        <span class="form-hint">Optional. Defaults to 4 hours after start.</span>
+      </div>
+      <div class="field">
+        <label for="calendar_location">Location</label>
+        <input type="text" id="calendar_location" name="calendar_location" value="{{index .Config "calendar_location"}}" placeholder="optional">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="calendar_description_de">Calendar Description (DE)</label>
+        <textarea id="calendar_description_de" name="calendar_description_de" rows="2">{{index .Config "calendar_description_de"}}</textarea>
+      </div>
+      <div class="field">
+        <label for="calendar_description_en">Calendar Description (EN)</label>
+        <textarea id="calendar_description_en" name="calendar_description_en" rows="2">{{index .Config "calendar_description_en"}}</textarea>
+      </div>
+    </div>
+
     <div class="field-row">
       <div class="field">
         <label for="charity_name">Charity Name</label>

@@ -71,20 +71,10 @@
   <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7">{{.}}</div>
   {{end}}
 
-  {{/* Charity CTA */}}
-  {{if cfg .Base.Config "charity_url"}}
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:2rem;text-align:center">
-    <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem">
-      {{t .Base.Lang "charity.cta"}}
-    </p>
-    {{with cfg .Base.Config "charity_name"}}<p style="color:var(--text);margin-bottom:0.75rem"><strong>{{.}}</strong></p>{{end}}
-    <a href="{{cfg .Base.Config "charity_url"}}" target="_blank" rel="noopener" class="btn btn-outline">
-      {{t .Base.Lang "charity.cta"}} →
-    </a>
-  </div>
-  {{end}}
-
   <div class="confirmed-actions">
+    {{if and (eq .Base.Guest.Status "accepted") (cfgEnabled .Base.Config "calendar_enabled")}}
+    <a href="/me/calendar.ics" class="btn btn-primary">{{t .Base.Lang "confirmed.calendar"}}</a>
+    {{end}}
     <a href="/me/rsvp" class="btn btn-outline">{{t .Base.Lang "confirmed.change"}}</a>
     <a href="/me" class="btn btn-ghost">← {{if eq .Base.Lang "en"}}Back{{else}}Zurück{{end}}</a>
   </div>

@@ -55,9 +55,9 @@ func (h *GuestHandler) SpellPage(c echo.Context) error {
 
 	spell := c.QueryParam("spell")
 	return c.Render(http.StatusOK, "spell.html", map[string]interface{}{
-		"Base":      bd,
+		"Base":         bd,
 		"PrefillSpell": spell,
-		"Error":     false,
+		"Error":        false,
 	})
 }
 
@@ -193,6 +193,34 @@ func (h *GuestHandler) Confirmed(c echo.Context) error {
 		return err
 	}
 	return c.Render(http.StatusOK, "confirmed.html", map[string]interface{}{"Base": bd})
+}
+
+// GET /me/calendar.ics — download party calendar event
+func (h *GuestHandler) CalendarICS(c echo.Context) error {
+	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/")
+	}
+	if guest.Status != "accepted" {
+		return echo.ErrNotFound
+	}
+
+	cfg, err := h.config.All()
+	if err != nil {
+		return err
+	}
+	if !calendarEnabled(cfg) {
+		return echo.ErrNotFound
+	}
+
+	ics, err := buildCalendarICS(cfg, middleware.GetLang(c), guest.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Could not build calendar file.")
+	}
+
+	c.Response().Header().Set("Content-Type", "text/calendar; charset=utf-8")
+	c.Response().Header().Set("Content-Disposition", `attachment; filename="party.ics"`)
+	return c.Blob(http.StatusOK, "text/calendar; charset=utf-8", ics)
 }
 
 // GET /unsubscribe?token=...

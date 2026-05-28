@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yuin/goldmark"
 	"party2026/models"
 )
 
@@ -60,10 +61,16 @@ func (m *Mailer) SendConfirmation(g *models.Guest, cfg map[string]string, lang s
 	_ = sendMail(*g.Email, subject, buf.String(), cfg)
 }
 
-func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyHTML string, cfg map[string]string) error {
+func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyMD string, cfg map[string]string) error {
 	var errs []string
 	for _, g := range recipients {
 		if g.Email == nil || *g.Email == "" {
+			continue
+		}
+		personalSubject := personalizeNewsletterText(subject, g)
+		bodyHTML, err := renderNewsletterMarkdown(personalizeNewsletterText(bodyMD, g))
+		if err != nil {
+			errs = append(errs, fmt.Sprintf("%s: %v", *g.Email, err))
 			continue
 		}
 		html := bodyHTML + fmt.Sprintf(
@@ -71,7 +78,7 @@ func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyHTML str
 			<a href="%s/unsubscribe?token=%s">Abmelden / Unsubscribe</a></p>`,
 			m.baseURL, m.UnsubToken(g.ID),
 		)
-		if err := sendMail(*g.Email, subject, html, cfg); err != nil {
+		if err := sendMail(*g.Email, personalSubject, html, cfg); err != nil {
 			errs = append(errs, fmt.Sprintf("%s: %v", *g.Email, err))
 		}
 	}
@@ -79,6 +86,19 @@ func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyHTML str
 		return fmt.Errorf("send errors: %s", strings.Join(errs, "; "))
 	}
 	return nil
+}
+
+func personalizeNewsletterText(text string, g models.Guest) string {
+	text = strings.ReplaceAll(text, "{name}", g.Name)
+	return text
+}
+
+func renderNewsletterMarkdown(bodyMD string) (string, error) {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(bodyMD), &buf); err != nil {
+		return bodyMD, err
+	}
+	return buf.String(), nil
 }
 
 // SendTestMail sends a simple HTML message to verify SMTP settings.

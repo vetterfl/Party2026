@@ -22,13 +22,13 @@
   <form class="admin-form wide" method="POST" action="/admin/newsletter">
     <div class="field">
       <label for="subject">Subject</label>
-      <input type="text" id="subject" name="subject" placeholder="Summer Party Update…" required>
+      <input type="text" id="subject" name="subject" placeholder="Hi {name} — Summer Party Update…" required>
     </div>
 
     <div class="field">
       <label for="body">Body (Markdown)</label>
-      <textarea class="newsletter-body" id="body" name="body" placeholder="# Update&#10;&#10;Hey everyone, …" required></textarea>
-      <span class="form-hint">Markdown is rendered to HTML. An unsubscribe link is added automatically.</span>
+      <textarea class="newsletter-body" id="body" name="body" placeholder="# Update&#10;&#10;Hi {name}, …" required></textarea>
+      <span class="form-hint">Markdown is rendered to HTML. Use <code>{name}</code> for the recipient's name (also works in the subject). An unsubscribe link is added automatically.</span>
     </div>
 
     <div class="form-actions">

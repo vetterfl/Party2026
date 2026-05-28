@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"bytes"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/yuin/goldmark"
 	"party2026/models"
 )
 
@@ -37,19 +35,13 @@ func (h *NewsletterHandler) Send(c echo.Context) error {
 	subject := c.FormValue("subject")
 	bodyMD := c.FormValue("body")
 
-	var buf bytes.Buffer
-	if err := goldmark.Convert([]byte(bodyMD), &buf); err != nil {
-		buf.WriteString(bodyMD)
-	}
-	bodyHTML := buf.String()
-
 	recipients, err := h.guests.NewsletterRecipients()
 	if err != nil {
 		return err
 	}
 
 	cfg, _ := h.config.All()
-	sendErr := h.mailer.SendNewsletter(recipients, subject, bodyHTML, cfg)
+	sendErr := h.mailer.SendNewsletter(recipients, subject, bodyMD, cfg)
 
 	errMsg := ""
 	if sendErr != nil {

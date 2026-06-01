@@ -170,6 +170,16 @@ func (h *AdminHandler) GuestUpdate(c echo.Context) error {
 	}
 
 	g.Name = strings.TrimSpace(c.FormValue("name"))
+	g.Nickname = strings.TrimSpace(c.FormValue("nickname"))
+	if g.Nickname == "" {
+		g.Nickname = g.Name
+	}
+	if note := strings.TrimSpace(c.FormValue("internal_note")); note != "" {
+		g.InternalNote = &note
+	} else {
+		g.InternalNote = nil
+	}
+
 	status := c.FormValue("status")
 	if !models.ValidGuestStatus(status) {
 		return c.Render(http.StatusBadRequest, "guest_edit.html", map[string]interface{}{
@@ -274,16 +284,16 @@ func (h *AdminHandler) ExportCSV(c echo.Context) error {
 
 	var buf bytes.Buffer
 	w := csv.NewWriter(&buf)
-	_ = w.Write([]string{"Name", "Code", "Status", "Email", "Phone", "Plus One", "Plus One Name", "Children", "Song", "Comment", "Newsletter", "RSVP At", "Logins", "Views", "Interactions"})
+	_ = w.Write([]string{"Name", "Nickname", "Code", "Status", "Email", "Phone", "Plus One", "Plus One Name", "Children", "Song", "Comment", "Internal Note", "Newsletter", "RSVP At", "Logins", "Views", "Interactions"})
 	for _, g := range guests {
 		rsvpAt := ""
 		if g.RSVPAt != nil {
 			rsvpAt = g.RSVPAt.Format(time.RFC3339)
 		}
 		_ = w.Write(csvSafeRow(
-			g.Name, g.Code, g.Status,
+			g.Name, g.Nickname, g.Code, g.Status,
 			derefStr(g.Email), derefStr(g.PhoneE164), boolStr(g.PlusOne), derefStr(g.PlusOneName),
-			fmt.Sprint(g.Children), derefStr(g.Song), derefStr(g.Comment),
+			fmt.Sprint(g.Children), derefStr(g.Song), derefStr(g.Comment), derefStr(g.InternalNote),
 			boolStr(g.Newsletter), rsvpAt,
 			fmt.Sprint(g.LoginCount), fmt.Sprint(g.ViewCount), fmt.Sprint(g.InteractionCount),
 		))
@@ -335,7 +345,7 @@ func (h *AdminHandler) guestInviteRows(guests []models.Guest, cfg map[string]str
 	rows := make([]guestInviteRow, 0, len(guests))
 	for _, guest := range guests {
 		inviteURL := h.baseURL + "/?spell=" + guest.Code
-		message := inviteMessage(cfg, guest.Name, inviteURL)
+		message := inviteMessage(cfg, guest.DisplayName(), inviteURL)
 		row := guestInviteRow{
 			Guest:         guest,
 			InviteURL:     inviteURL,

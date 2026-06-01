@@ -15,7 +15,8 @@
     <article class="admin-form" style="padding:1.25rem 1.5rem;margin:0">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:0.75rem">
         <div>
-          <strong style="font-size:1rem">{{.Name}}</strong>
+          <strong style="font-size:1rem">{{.Nickname}}</strong>
+          {{if ne .Nickname .Name}}<span style="color:var(--text-dim);font-size:0.85rem">({{.Name}})</span>{{end}}
           <span class="badge badge-{{.Status}}" style="margin-left:0.5rem">{{.Status}}</span>
         </div>
         <div style="font-size:0.75rem;color:var(--text-dim);white-space:nowrap">

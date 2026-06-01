@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invite — {{.Guest.Name}}</title>
+  <title>Invite — {{.Guest.DisplayName}}</title>
   <style>
     @font-face {
       font-family: 'Space Grotesk';
@@ -246,7 +246,7 @@
 <body>
 
   <div class="print-hint">
-    Invite card for <strong>{{.Guest.Name}}</strong><br>
+    Invite card for <strong>{{.Guest.DisplayName}}</strong><br>
     Print at A6 landscape or 2-up on A4.
     <button onclick="window.print()">Print</button>
   </div>
@@ -258,7 +258,7 @@
         <div class="ticket-year">Summer {{index .Config "party_date" | printf "%.4s"}}</div>
       </div>
 
-      <div class="ticket-guest-name">{{.Guest.Name}}</div>
+      <div class="ticket-guest-name">{{.Guest.DisplayName}}</div>
 
       <div class="ticket-details">
         <div class="ticket-detail-row">
@@ -280,7 +280,7 @@
       <div class="stub-qr">
         <img src="{{.QRPNG}}" alt="QR Code">
       </div>
-      <span class="stub-name">{{.Guest.Name}}</span>
+      <span class="stub-name">{{.Guest.DisplayName}}</span>
       <span class="stub-admit">Admit One</span>
     </div>
   </div>

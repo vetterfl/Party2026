@@ -115,7 +115,7 @@ func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyMD strin
 }
 
 func personalizeNewsletterText(text string, g models.Guest) string {
-	text = strings.ReplaceAll(text, "{name}", g.Name)
+	text = strings.ReplaceAll(text, "{name}", g.DisplayName())
 	return text
 }
 

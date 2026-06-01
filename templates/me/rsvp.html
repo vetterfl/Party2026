@@ -5,7 +5,7 @@
 
 <main class="rsvp-container">
   <h1 class="rsvp-page-title">{{t .Base.Lang "rsvp.title"}}</h1>
-  <p class="rsvp-page-subtitle">— {{.Base.Guest.Name}}</p>
+  <p class="rsvp-page-subtitle">— {{.Base.Guest.DisplayName}}</p>
 
   <form class="form-card" id="rsvp-form" method="POST" action="/me/rsvp">
     {{template "_csrf" $}}

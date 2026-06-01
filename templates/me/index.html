@@ -9,9 +9,9 @@
     <p class="me-greeting">{{t .Base.Lang "me.greeting"}} — {{if eq .Base.Lang "en"}}{{cfg .Base.Config "party_name_en"}}{{else}}{{cfg .Base.Config "party_name_de"}}{{end}}</p>
     <h1 class="me-name">
       {{- if eq .Base.Lang "en" -}}
-        Hey, <span class="me-name-accent">{{.Base.Guest.Name}}</span>!
+        Hey, <span class="me-name-accent">{{.Base.Guest.DisplayName}}</span>!
       {{- else -}}
-        Hey, <span class="me-name-accent">{{.Base.Guest.Name}}</span>!
+        Hey, <span class="me-name-accent">{{.Base.Guest.DisplayName}}</span>!
       {{- end -}}
     </h1>
   </section>

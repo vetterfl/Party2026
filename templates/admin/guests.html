@@ -33,7 +33,7 @@
     <table>
       <thead>
         <tr>
-          <th>Name</th>
+          <th>Name / Nickname</th>
           <th>Code</th>
           <th>Phone</th>
           <th>Status</th>
@@ -49,7 +49,11 @@
       <tbody>
         {{range .GuestInviteRows}}
         <tr>
-          <td class="name-col">{{.Guest.Name}}</td>
+          <td class="name-col">
+            {{.Guest.Nickname}}
+            {{if ne .Guest.Nickname .Guest.Name}}<span style="display:block;font-size:0.7rem;color:var(--text-dim)">{{.Guest.Name}}</span>{{end}}
+            {{if deref .Guest.InternalNote}}<span title="{{deref .Guest.InternalNote}}" style="display:block;font-size:0.7rem;color:var(--accent);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📝 {{deref .Guest.InternalNote}}</span>{{end}}
+          </td>
           <td class="code-col">{{.Guest.Code}}</td>
           <td style="white-space:nowrap;font-size:0.75rem">{{if deref .Guest.PhoneE164}}{{deref .Guest.PhoneE164}}{{else}}–{{end}}</td>
           <td><span class="badge badge-{{.Guest.Status}}">{{.Guest.Status}}</span></td>

@@ -13,8 +13,10 @@ import (
 type Guest struct {
 	ID          string     `db:"id"`
 	Code        string     `db:"code"`
-	Name        string     `db:"name"`
-	Status      string     `db:"status"`
+	Name         string  `db:"name"`
+	Nickname     string  `db:"nickname"`
+	InternalNote *string `db:"internal_note"`
+	Status       string  `db:"status"`
 	Email       *string    `db:"email"`
 	PhoneE164   *string    `db:"phone_e164"`
 	PlusOne     bool       `db:"plus_one"`
@@ -29,6 +31,14 @@ type Guest struct {
 	InteractionCount  int        `db:"interaction_count"`
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   time.Time  `db:"updated_at"`
+}
+
+// DisplayName returns the name shown to the guest (nickname, falling back to name).
+func (g *Guest) DisplayName() string {
+	if n := strings.TrimSpace(g.Nickname); n != "" {
+		return n
+	}
+	return g.Name
 }
 
 type GuestStore struct{ db *sqlx.DB }
@@ -91,14 +101,15 @@ func (s *GuestStore) Create(name string) (*Guest, error) {
 		ID:        uuid.New().String(),
 		Code:      generateCode(6),
 		Name:      name,
+		Nickname:  name,
 		Status:    "added",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 	_, err := s.db.Exec(`
-		INSERT INTO guests (id, code, name, status, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?)`,
-		g.ID, g.Code, g.Name, g.Status, g.CreatedAt, g.UpdatedAt,
+		INSERT INTO guests (id, code, name, nickname, status, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		g.ID, g.Code, g.Name, g.Nickname, g.Status, g.CreatedAt, g.UpdatedAt,
 	)
 	return g, err
 }
@@ -107,12 +118,13 @@ func (s *GuestStore) Update(g *Guest) error {
 	g.UpdatedAt = time.Now()
 	_, err := s.db.Exec(`
 		UPDATE guests SET
-			name=?, status=?, email=?, phone_e164=?, plus_one=?, plus_one_name=?,
-			children=?, song=?, comment=?, newsletter=?, rsvp_at=?, updated_at=?
+			name=?, nickname=?, internal_note=?, status=?, email=?, phone_e164=?,
+			plus_one=?, plus_one_name=?, children=?, song=?, comment=?, newsletter=?,
+			rsvp_at=?, updated_at=?
 		WHERE id=?`,
-		g.Name, g.Status, g.Email, g.PhoneE164, g.PlusOne, g.PlusOneName,
-		g.Children, g.Song, g.Comment, g.Newsletter, g.RSVPAt, g.UpdatedAt,
-		g.ID,
+		g.Name, g.Nickname, g.InternalNote, g.Status, g.Email, g.PhoneE164,
+		g.PlusOne, g.PlusOneName, g.Children, g.Song, g.Comment, g.Newsletter,
+		g.RSVPAt, g.UpdatedAt, g.ID,
 	)
 	return err
 }

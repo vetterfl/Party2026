@@ -7,7 +7,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Edit Guest</h1>
-      <p class="page-subtitle">{{.Guest.Name}} · <code style="font-size:0.8rem;color:var(--accent)">{{.Guest.Code}}</code></p>
+      <p class="page-subtitle">{{.Guest.Nickname}}{{if ne .Guest.Nickname .Guest.Name}} ({{.Guest.Name}}){{end}} · <code style="font-size:0.8rem;color:var(--accent)">{{.Guest.Code}}</code></p>
     </div>
     <div style="display:flex;gap:0.5rem">
       <a href="/admin/guests/{{.Guest.ID}}/qr" class="btn btn-outline btn-sm">Download QR</a>
@@ -22,9 +22,23 @@
     <div class="alert alert-error">{{.Error}}</div>
     {{end}}
 
+    <div class="field-row">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" value="{{.Guest.Name}}" required>
+        <span class="form-hint">Full name for your records (admin only).</span>
+      </div>
+      <div class="field">
+        <label for="nickname">Nickname</label>
+        <input type="text" id="nickname" name="nickname" value="{{.Guest.Nickname}}" placeholder="{{.Guest.Name}}">
+        <span class="form-hint">Shown to the guest on their invite page and in emails.</span>
+      </div>
+    </div>
+
     <div class="field">
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" value="{{.Guest.Name}}" required>
+      <label for="internal_note">Internal Note</label>
+      <textarea id="internal_note" name="internal_note" rows="3" placeholder="Admin-only notes…">{{deref .Guest.InternalNote}}</textarea>
+      <span class="form-hint">Not visible to guests.</span>
     </div>
 
     <div class="field">

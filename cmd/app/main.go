@@ -126,6 +126,7 @@ func main() {
 	admin := e.Group("/admin", mw.RequireAdmin)
 	admin.GET("", ah.Dashboard)
 	admin.GET("/guests", ah.GuestList)
+	admin.GET("/messages", ah.MessageBoard)
 	admin.POST("/guests", ah.GuestCreate)
 	admin.GET("/guests/:id/edit", ah.GuestEdit)
 	admin.POST("/guests/:id/edit", ah.GuestUpdate)

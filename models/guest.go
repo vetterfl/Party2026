@@ -21,9 +21,12 @@ type Guest struct {
 	PlusOneName *string    `db:"plus_one_name"`
 	Children    int        `db:"children"`
 	Song        *string    `db:"song"`
-	Comment     *string    `db:"comment"`
-	Newsletter  bool       `db:"newsletter"`
-	RSVPAt      *time.Time `db:"rsvp_at"`
+	Comment           *string    `db:"comment"`
+	Newsletter        bool       `db:"newsletter"`
+	RSVPAt            *time.Time `db:"rsvp_at"`
+	LoginCount        int        `db:"login_count"`
+	ViewCount         int        `db:"view_count"`
+	InteractionCount  int        `db:"interaction_count"`
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   time.Time  `db:"updated_at"`
 }
@@ -169,6 +172,39 @@ func (s *GuestStore) NewsletterRecipients() ([]Guest, error) {
 	err := s.db.Select(&gs,
 		`SELECT * FROM guests WHERE newsletter = 1 AND email IS NOT NULL AND email != ''`)
 	return gs, err
+}
+
+func (s *GuestStore) WithComments() ([]Guest, error) {
+	var gs []Guest
+	err := s.db.Select(&gs, `
+		SELECT * FROM guests
+		WHERE comment IS NOT NULL AND trim(comment) != ''
+		ORDER BY COALESCE(rsvp_at, updated_at) DESC`)
+	return gs, err
+}
+
+func (s *GuestStore) IncrementLoginCount(id string) error {
+	_, err := s.db.Exec(
+		`UPDATE guests SET login_count = login_count + 1, updated_at = ? WHERE id = ?`,
+		time.Now(), id,
+	)
+	return err
+}
+
+func (s *GuestStore) IncrementViewCount(id string) error {
+	_, err := s.db.Exec(
+		`UPDATE guests SET view_count = view_count + 1, updated_at = ? WHERE id = ?`,
+		time.Now(), id,
+	)
+	return err
+}
+
+func (s *GuestStore) IncrementInteractionCount(id string) error {
+	_, err := s.db.Exec(
+		`UPDATE guests SET interaction_count = interaction_count + 1, updated_at = ? WHERE id = ?`,
+		time.Now(), id,
+	)
+	return err
 }
 
 func (s *GuestStore) UnsubscribeByID(id string) error {

@@ -62,6 +62,31 @@ func (m *Mailer) SendConfirmation(g *models.Guest, cfg map[string]string, lang s
 	_ = sendMail(*g.Email, subject, buf.String(), cfg)
 }
 
+func (m *Mailer) SendRSVPNotification(g *models.Guest, cfg map[string]string) {
+	to := strings.TrimSpace(cfg["rsvp_notify_email"])
+	if to == "" {
+		return
+	}
+
+	rsvpAt := "—"
+	if g.RSVPAt != nil {
+		rsvpAt = g.RSVPAt.Format("02.01.2006 15:04")
+	}
+
+	subject := fmt.Sprintf("RSVP: %s (%s)", g.Name, g.Status)
+
+	var buf bytes.Buffer
+	_ = m.tmpl.ExecuteTemplate(&buf, "rsvp_notify.html", map[string]interface{}{
+		"Guest":   g,
+		"RSVPAt":  rsvpAt,
+		"AdminURL": m.baseURL + "/admin/guests/" + g.ID + "/edit",
+	})
+
+	if err := sendMail(to, subject, buf.String(), cfg); err != nil {
+		fmt.Printf("rsvp notify email failed: %v\n", err)
+	}
+}
+
 func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyMD string, cfg map[string]string) error {
 	var errs []string
 	for _, g := range recipients {

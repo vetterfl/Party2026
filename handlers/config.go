@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"party2026/models"
@@ -56,6 +57,7 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 	}
 
 	_ = h.config.Set("hero_image_url", sanitizeImageURL(c.FormValue("hero_image_url")))
+	_ = h.config.Set("rsvp_notify_email", strings.TrimSpace(c.FormValue("rsvp_notify_email")))
 
 	// Theme selectors — allow empty selection (keep existing)
 	for _, k := range []string{"theme_login", "theme_me"} {

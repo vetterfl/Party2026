@@ -78,6 +78,7 @@ func (h *GuestHandler) Login(c echo.Context) error {
 	if err := middleware.SetGuestID(c, guest.ID); err != nil {
 		return err
 	}
+	_ = h.guests.IncrementLoginCount(guest.ID)
 	return c.Redirect(http.StatusSeeOther, "/me")
 }
 
@@ -101,6 +102,12 @@ func (h *GuestHandler) Logout(c echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, "/")
 }
 
+func (h *GuestHandler) recordView(c echo.Context) {
+	if id := middleware.GetGuestID(c); id != "" {
+		_ = h.guests.IncrementViewCount(id)
+	}
+}
+
 // GET /me — personal invite page
 func (h *GuestHandler) Me(c echo.Context) error {
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
@@ -108,6 +115,7 @@ func (h *GuestHandler) Me(c echo.Context) error {
 		_ = middleware.ClearGuestSession(c)
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
+	h.recordView(c)
 
 	bd, err := h.loadBase(c, guest, "theme_me")
 	if err != nil {
@@ -122,6 +130,7 @@ func (h *GuestHandler) RSVPForm(c echo.Context) error {
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
+	h.recordView(c)
 	bd, err := h.loadBase(c, guest, "theme_me")
 	if err != nil {
 		return err
@@ -187,9 +196,13 @@ func (h *GuestHandler) RSVPSubmit(c echo.Context) error {
 		return err
 	}
 
+	_ = h.guests.IncrementInteractionCount(guest.ID)
+
+	cfg, _ := h.config.All()
+	go h.mailer.SendRSVPNotification(guest, cfg)
+
 	// Send confirmation email asynchronously
 	if guest.Email != nil && *guest.Email != "" {
-		cfg, _ := h.config.All()
 		go h.mailer.SendConfirmation(guest, cfg, middleware.GetLang(c))
 	}
 
@@ -202,6 +215,7 @@ func (h *GuestHandler) Confirmed(c echo.Context) error {
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
+	h.recordView(c)
 	bd, err := h.loadBase(c, guest, "theme_me")
 	if err != nil {
 		return err
@@ -218,6 +232,7 @@ func (h *GuestHandler) CalendarICS(c echo.Context) error {
 	if guest.Status != "accepted" {
 		return echo.ErrNotFound
 	}
+	h.recordView(c)
 
 	cfg, err := h.config.All()
 	if err != nil {

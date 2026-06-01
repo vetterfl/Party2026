@@ -42,6 +42,7 @@
           <th>Song</th>
           <th>NL</th>
           <th>RSVP</th>
+          <th title="Logins / page views / RSVP submissions">Activity</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -59,6 +60,7 @@
           </td>
           <td>{{boolCheck .Guest.Newsletter}}</td>
           <td style="white-space:nowrap;font-size:0.75rem">{{formatDatePtr .Guest.RSVPAt}}</td>
+          <td style="white-space:nowrap;font-size:0.75rem;font-variant-numeric:tabular-nums">{{.Guest.LoginCount}} / {{.Guest.ViewCount}} / {{.Guest.InteractionCount}}</td>
           <td>
             <div class="action-group">
               <button class="btn btn-outline btn-xs"
@@ -83,7 +85,7 @@
         </tr>
         {{else}}
         <tr>
-          <td colspan="10" style="text-align:center;color:var(--text-dim);padding:2rem">
+          <td colspan="11" style="text-align:center;color:var(--text-dim);padding:2rem">
             No guests yet.
           </td>
         </tr>

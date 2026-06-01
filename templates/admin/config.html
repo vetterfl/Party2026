@@ -80,6 +80,12 @@
       <input type="text" id="smtp_from_name" name="smtp_from_name" value="{{index .Config "smtp_from_name"}}">
     </div>
 
+    <div class="field">
+      <label for="rsvp_notify_email">RSVP Notification Email</label>
+      <input type="email" id="rsvp_notify_email" name="rsvp_notify_email" value="{{index .Config "rsvp_notify_email"}}" placeholder="you@example.com">
+      <span class="form-hint">Receive an email with full RSVP details whenever a guest submits. Leave empty to disable.</span>
+    </div>
+
     <div class="field-row">
       <div class="field">
         <label for="invite_message_de">Invite Message (DE)</label>

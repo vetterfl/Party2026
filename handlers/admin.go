@@ -99,6 +99,17 @@ func (h *AdminHandler) Dashboard(c echo.Context) error {
 	})
 }
 
+// GET /admin/messages — RSVP comment message board
+func (h *AdminHandler) MessageBoard(c echo.Context) error {
+	guests, err := h.guests.WithComments()
+	if err != nil {
+		return err
+	}
+	return c.Render(http.StatusOK, "messages.html", map[string]interface{}{
+		"Guests": guests,
+	})
+}
+
 // GET /admin/guests
 func (h *AdminHandler) GuestList(c echo.Context) error {
 	filter := c.QueryParam("status")
@@ -263,7 +274,7 @@ func (h *AdminHandler) ExportCSV(c echo.Context) error {
 
 	var buf bytes.Buffer
 	w := csv.NewWriter(&buf)
-	_ = w.Write([]string{"Name", "Code", "Status", "Email", "Phone", "Plus One", "Plus One Name", "Children", "Song", "Comment", "Newsletter", "RSVP At"})
+	_ = w.Write([]string{"Name", "Code", "Status", "Email", "Phone", "Plus One", "Plus One Name", "Children", "Song", "Comment", "Newsletter", "RSVP At", "Logins", "Views", "Interactions"})
 	for _, g := range guests {
 		rsvpAt := ""
 		if g.RSVPAt != nil {
@@ -274,6 +285,7 @@ func (h *AdminHandler) ExportCSV(c echo.Context) error {
 			derefStr(g.Email), derefStr(g.PhoneE164), boolStr(g.PlusOne), derefStr(g.PlusOneName),
 			fmt.Sprint(g.Children), derefStr(g.Song), derefStr(g.Comment),
 			boolStr(g.Newsletter), rsvpAt,
+			fmt.Sprint(g.LoginCount), fmt.Sprint(g.ViewCount), fmt.Sprint(g.InteractionCount),
 		))
 	}
 	w.Flush()

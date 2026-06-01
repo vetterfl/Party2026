@@ -74,6 +74,22 @@
       </div>
     </div>
 
+    {{if deref .Guest.Comment}}
+    <div class="field">
+      <label>RSVP Message</label>
+      <p style="margin:0;padding:0.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;line-height:1.6;white-space:pre-wrap">{{deref .Guest.Comment}}</p>
+    </div>
+    {{end}}
+
+    <div class="field-row">
+      <div class="field">
+        <label>Activity</label>
+        <p style="margin:0;font-size:0.85rem;color:var(--text-dim)">
+          {{.Guest.LoginCount}} logins · {{.Guest.ViewCount}} page views · {{.Guest.InteractionCount}} RSVP submissions
+        </p>
+      </div>
+    </div>
+
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Save</button>
       <a href="/admin/guests" class="btn btn-ghost">Cancel</a>

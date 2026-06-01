@@ -118,6 +118,12 @@ func NewRenderer(tplFS fs.FS) (*Renderer, error) {
 			v := m[key]
 			return v == "1" || strings.EqualFold(v, "true")
 		},
+		"cssURL": func(raw string) template.CSS {
+			if u := cssImageURL(raw); u != "" {
+				return template.CSS("url('" + u + "')")
+			}
+			return ""
+		},
 	}
 
 	tmpl, err := template.New("").Funcs(funcMap).ParseFS(tplFS,

@@ -5,7 +5,7 @@
 
 <main>
   {{/* Hero */}}
-  <section class="me-hero">
+  <section class="me-hero"{{with cssURL (cfg .Base.Config "hero_image_url")}} style="--hero-image: {{.}}"{{end}}>
     <p class="me-greeting">{{t .Base.Lang "me.greeting"}} — {{if eq .Base.Lang "en"}}{{cfg .Base.Config "party_name_en"}}{{else}}{{cfg .Base.Config "party_name_de"}}{{end}}</p>
     <h1 class="me-name">
       {{- if eq .Base.Lang "en" -}}

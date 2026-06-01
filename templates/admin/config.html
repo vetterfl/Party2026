@@ -93,6 +93,14 @@
       </div>
     </div>
 
+    <div style="height:1px;background:var(--border)"></div>
+
+    <div class="field">
+      <label for="hero_image_url">Hero Background Image URL</label>
+      <input type="url" id="hero_image_url" name="hero_image_url" value="{{index .Config "hero_image_url"}}" placeholder="https://…">
+      <span class="form-hint">Full-width jumbo image on the guest invite page (/me). HTTPS URL to a JPG, PNG, or WebP. Leave empty for gradient only.</span>
+    </div>
+
     {{if .Themes}}
     <div style="height:1px;background:var(--border)"></div>
 

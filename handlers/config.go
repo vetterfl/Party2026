@@ -55,6 +55,8 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 		_ = h.config.Set(k, c.FormValue(k))
 	}
 
+	_ = h.config.Set("hero_image_url", sanitizeImageURL(c.FormValue("hero_image_url")))
+
 	// Theme selectors — allow empty selection (keep existing)
 	for _, k := range []string{"theme_login", "theme_me"} {
 		if v := c.FormValue(k); v != "" {

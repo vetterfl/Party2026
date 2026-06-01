@@ -628,11 +628,15 @@ body::before {
 .content-body h2,
 .content-body h3,
 .content-body h4 {
-  font-size: 1.1rem;
   font-weight: 800;
   color: var(--text);
   margin: 1.75rem 0 0.75rem;
 }
+
+.content-body h1 { font-size: 1.85rem; }
+.content-body h2 { font-size: 1.3rem; }
+.content-body h3 { font-size: 1.1rem; }
+.content-body h4 { font-size: 1rem; }
 
 .content-body h1:first-child,
 .content-body h2:first-child,
@@ -1025,6 +1029,84 @@ body::before {
   0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
   80%  { opacity: 1; }
   100% { transform: translateY(100vh) rotate(720deg) scale(0.5); opacity: 0; }
+}
+
+/* ── Site footer ────────────────────────────────────────────── */
+.site-footer {
+  text-align: center;
+  padding: 2.5rem 1.5rem 3rem;
+  margin-top: 1rem;
+}
+
+.site-footer-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.site-footer-note p {
+  margin: 0;
+}
+
+.site-footer-legal {
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.site-footer-legal a {
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.site-footer-legal a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.spell-page .site-footer {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 2rem;
+}
+
+.spell-page .site-footer-legal a {
+  color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.spell-page .site-footer-legal a:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.spell-page .site-footer-note {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Privacy page ───────────────────────────────────────────── */
+.privacy-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 6rem 1.5rem 4rem;
+}
+
+.privacy-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text);
+}
+
+.privacy-body {
+  padding: 2rem;
+}
+
+.privacy-back {
+  text-align: center;
+  margin-top: 2rem;
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */

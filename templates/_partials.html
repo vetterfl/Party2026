@@ -64,6 +64,17 @@
 <div class="pool-shimmer" aria-hidden="true"></div>
 {{end}}
 
+{{define "_footer_guest"}}
+<footer class="site-footer">
+  {{with content .Base.Content "footer_note" .Base.Lang}}
+  <div class="site-footer-note content-body">{{.}}</div>
+  {{end}}
+  <p class="site-footer-legal">
+    <a href="/datenschutz">{{t .Base.Lang "footer.privacy"}}</a>
+  </p>
+</footer>
+{{end}}
+
 {{define "_scripts_guest"}}
 <script src="/assets/themes/{{.Base.Theme}}/theme.js"></script>
 {{end}}

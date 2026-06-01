@@ -3,25 +3,6 @@
    Extends shared behaviours with tropical extras
    ═══════════════════════════════════════════════ */
 
-/* ── Inject party title on spell page ──────────── */
-(function injectTitle() {
-  const page = document.querySelector('.spell-page');
-  if (!page) return;
-  const icon = page.querySelector('.spell-icon');
-  if (!icon) return;
-
-  const title = document.createElement('p');
-  title.className = 'aqua-title';
-  title.textContent = 'Aqua Fiesta';
-
-  const sub = document.createElement('p');
-  sub.className = 'aqua-subtitle';
-  sub.textContent = 'Summer Party 2026';
-
-  icon.insertAdjacentElement('afterend', sub);
-  icon.insertAdjacentElement('afterend', title);
-})();
-
 /* ── Spell page: prefill from URL ──────────────── */
 (function prefillSpell() {
   const input = document.getElementById('spell-input');

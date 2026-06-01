@@ -74,9 +74,9 @@ func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyMD strin
 			errs = append(errs, fmt.Sprintf("%s: %v", *g.Email, err))
 			continue
 		}
-		html := bodyHTML + fmt.Sprintf(
-			`<p style="font-size:11px;color:#666">
-			<a href="%s/unsubscribe?token=%s">Abmelden / Unsubscribe</a></p>`,
+		html := wrapNewsletterHTML(bodyHTML) + fmt.Sprintf(
+			`<p style="font-size:11px;color:#666;margin-top:1.5rem">
+			<a href="%s/unsubscribe?token=%s" style="color:#008a6b">Abmelden / Unsubscribe</a></p>`,
 			m.baseURL, m.UnsubToken(g.ID),
 		)
 		if err := sendMail(*g.Email, personalSubject, html, cfg); err != nil {
@@ -100,6 +100,18 @@ func renderNewsletterMarkdown(bodyMD string) (string, error) {
 		return bodyMD, err
 	}
 	return buf.String(), nil
+}
+
+func wrapNewsletterHTML(body string) string {
+	return fmt.Sprintf(`<div style="max-width:520px;margin:0 auto;font-family:system-ui,sans-serif;font-size:14px;line-height:1.7;color:#333">
+<style>
+a { color: #008a6b; }
+h1 { font-size: 1.5rem; margin: 1.5rem 0 0.75rem; color: #111; }
+h2 { font-size: 1.2rem; margin: 1.25rem 0 0.5rem; color: #111; }
+h3 { font-size: 1.05rem; margin: 1rem 0 0.5rem; color: #111; }
+</style>
+%s
+</div>`, body)
 }
 
 // SendTestMail sends a simple HTML message to verify SMTP settings.

@@ -109,6 +109,7 @@ func main() {
 	e.GET("/logout", gh.Logout)
 	e.POST("/lang", gh.SetLang)
 	e.GET("/unsubscribe", gh.Unsubscribe)
+	e.GET("/datenschutz", gh.Privacy)
 
 	me := e.Group("/me", mw.RequireGuest)
 	me.GET("", gh.Me)

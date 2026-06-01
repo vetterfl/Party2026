@@ -6,7 +6,7 @@
 <main>
   {{/* Hero */}}
   <section class="me-hero">
-    <p class="me-greeting">{{t .Base.Lang "nav.logout" | lower}} — {{cfg .Base.Config "party_name_de"}}</p>
+    <p class="me-greeting">{{t .Base.Lang "me.greeting"}} — {{if eq .Base.Lang "en"}}{{cfg .Base.Config "party_name_en"}}{{else}}{{cfg .Base.Config "party_name_de"}}{{end}}</p>
     <h1 class="me-name">
       {{- if eq .Base.Lang "en" -}}
         Hey, <span class="me-name-accent">{{.Base.Guest.Name}}</span>!
@@ -14,10 +14,6 @@
         Hey, <span class="me-name-accent">{{.Base.Guest.Name}}</span>!
       {{- end -}}
     </h1>
-    <div class="me-date-badge">
-      <span class="me-date-dot"></span>
-      {{t .Base.Lang "date.label"}}
-    </div>
   </section>
 
   <div class="me-hero-line"></div>
@@ -53,6 +49,8 @@
       </div>
     {{end}}
   </section>
+
+  {{template "_footer_guest" .}}
 </main>
 
 {{template "_scripts_guest" .}}

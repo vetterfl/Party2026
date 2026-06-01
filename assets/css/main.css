@@ -484,11 +484,15 @@ a:hover { text-decoration: underline; }
 .content-body h2,
 .content-body h3,
 .content-body h4 {
-  font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);
   margin: 1.75rem 0 0.75rem;
 }
+
+.content-body h1 { font-size: 1.85rem; }
+.content-body h2 { font-size: 1.3rem; }
+.content-body h3 { font-size: 1.1rem; }
+.content-body h4 { font-size: 1rem; }
 
 .content-body h1:first-child,
 .content-body h2:first-child,

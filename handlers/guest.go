@@ -81,6 +81,20 @@ func (h *GuestHandler) Login(c echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, "/me")
 }
 
+// GET /datenschutz — privacy policy (public)
+func (h *GuestHandler) Privacy(c echo.Context) error {
+	var guest *models.Guest
+	if id := middleware.GetGuestID(c); id != "" {
+		guest, _ = h.guests.FindByID(id)
+	}
+
+	bd, err := h.loadBase(c, guest, "theme_login")
+	if err != nil {
+		return err
+	}
+	return c.Render(http.StatusOK, "privacy.html", map[string]interface{}{"Base": bd})
+}
+
 // GET /logout
 func (h *GuestHandler) Logout(c echo.Context) error {
 	_ = middleware.ClearGuestSession(c)

@@ -462,8 +462,8 @@ body::before {
   min-height: 64vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 5rem 2rem 6rem;
+  justify-content: center;
+  padding: 4rem 2rem 7rem;
   max-width: 100%;
   margin: 0;
   overflow: hidden;
@@ -1112,7 +1112,7 @@ body::before {
 /* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .nav { padding: 0.85rem 1.25rem; }
-  .me-hero { min-height: 52vh; padding: 3.5rem 1.25rem 5rem; }
+  .me-hero { min-height: 52vh; padding: 3rem 1.25rem 5.5rem; }
   .me-content { padding: 2rem 1.25rem 3rem; }
   .rsvp-container,
   .confirmed-container { padding: 2rem 1.25rem 6rem; }

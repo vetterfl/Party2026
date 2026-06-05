@@ -345,7 +345,7 @@ func (h *AdminHandler) guestInviteRows(guests []models.Guest, cfg map[string]str
 	rows := make([]guestInviteRow, 0, len(guests))
 	for _, guest := range guests {
 		inviteURL := h.baseURL + "/?spell=" + guest.Code
-		message := inviteMessage(cfg, guest.DisplayName(), inviteURL)
+		message := inviteMessage(cfg, guest.DisplayName(), guest.Code, inviteURL)
 		row := guestInviteRow{
 			Guest:         guest,
 			InviteURL:     inviteURL,
@@ -360,12 +360,13 @@ func (h *AdminHandler) guestInviteRows(guests []models.Guest, cfg map[string]str
 	return rows
 }
 
-func inviteMessage(cfg map[string]string, name, inviteURL string) string {
+func inviteMessage(cfg map[string]string, name, spell, inviteURL string) string {
 	tpl := cfg["invite_message_de"]
 	if strings.TrimSpace(tpl) == "" {
-		tpl = "Hi {name}, hier ist deine Einladung: {url}"
+		tpl = "Hi {name}, hier ist deine Einladung: {url} (Code: {spell})"
 	}
 	msg := strings.ReplaceAll(tpl, "{name}", name)
+	msg = strings.ReplaceAll(msg, "{spell}", spell)
 	msg = strings.ReplaceAll(msg, "{url}", inviteURL)
 	return msg
 }

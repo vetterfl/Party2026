@@ -171,6 +171,15 @@ func (s *GuestStore) WithComments() ([]Guest, error) {
 	return gs, err
 }
 
+func (s *GuestStore) WithSongs() ([]Guest, error) {
+	var gs []Guest
+	err := s.db.Select(&gs, `
+		SELECT * FROM guests
+		WHERE song IS NOT NULL AND trim(song) != ''
+		ORDER BY lower(trim(song)), nickname`)
+	return gs, err
+}
+
 func (s *GuestStore) IncrementLoginCount(id string) error {
 	_, err := s.db.Exec(
 		`UPDATE guests SET login_count = login_count + 1, updated_at = ? WHERE id = ?`,

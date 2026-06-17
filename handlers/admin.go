@@ -110,6 +110,17 @@ func (h *AdminHandler) MessageBoard(c echo.Context) error {
 	})
 }
 
+// GET /admin/playlist — song requests from RSVP forms
+func (h *AdminHandler) Playlist(c echo.Context) error {
+	guests, err := h.guests.WithSongs()
+	if err != nil {
+		return err
+	}
+	return c.Render(http.StatusOK, "playlist.html", map[string]interface{}{
+		"Guests": guests,
+	})
+}
+
 // GET /admin/guests
 func (h *AdminHandler) GuestList(c echo.Context) error {
 	filter := c.QueryParam("status")

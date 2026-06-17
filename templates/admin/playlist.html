@@ -1,0 +1,51 @@
+{{template "_head_admin" .}}
+<body>
+<div class="admin-layout">
+{{template "_admin_topbar" .}}
+<main class="admin-main">
+
+  <div class="page-header">
+    <h1 class="page-title">Playlist</h1>
+    <p class="page-subtitle">Song requests from RSVP forms ({{len .Guests}})</p>
+  </div>
+
+  {{if .Guests}}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Song</th>
+          <th>Guest</th>
+          <th>Status</th>
+          <th>RSVP</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Guests}}
+        <tr>
+          <td style="font-style:italic">{{deref .Song}}</td>
+          <td class="name-col">
+            {{.Nickname}}
+            {{if ne .Nickname .Name}}<span style="display:block;font-size:0.7rem;color:var(--text-dim)">{{.Name}}</span>{{end}}
+          </td>
+          <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+          <td style="white-space:nowrap;font-size:0.75rem">{{formatDatePtr .RSVPAt}}</td>
+          <td>
+            <a href="/admin/guests/{{.ID}}/edit" class="btn btn-outline btn-xs">Edit</a>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="admin-form" style="padding:2rem;text-align:center;color:var(--text-dim)">
+    No song requests yet. Guests can add a favourite song on the RSVP form.
+  </div>
+  {{end}}
+
+</main>
+</div>
+</body>
+</html>

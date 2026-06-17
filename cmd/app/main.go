@@ -145,6 +145,7 @@ func main() {
 	admin.POST("/config", cfgh.Save)
 	admin.GET("/admins", auh.List)
 	admin.POST("/admins", auh.Create)
+	admin.POST("/admins/password", auh.ChangePassword)
 	admin.POST("/admins/:id/delete", auh.Delete)
 
 	addr := ":" + port()

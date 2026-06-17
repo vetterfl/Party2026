@@ -142,7 +142,8 @@ Markdown is rendered with goldmark.
 
 ## Admin: multi-admin accounts
 
-`Admin → Admins` lets you add and remove admin accounts. Two guardrails apply:
+`Admin → Admins` lets you add and remove admin accounts, and change your own
+password (current password required). Two guardrails apply:
 - you cannot delete your own account,
 - the last remaining admin cannot be deleted.
 

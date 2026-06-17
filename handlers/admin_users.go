@@ -101,3 +101,46 @@ func (h *AdminUsersHandler) Delete(c echo.Context) error {
 	}
 	return c.Redirect(http.StatusSeeOther, "/admin/admins")
 }
+
+// POST /admin/admins/password — change own password
+func (h *AdminUsersHandler) ChangePassword(c echo.Context) error {
+	selfID := middleware.GetAdminID(c)
+	admin, err := h.admins.FindByID(selfID)
+	if err != nil {
+		return err
+	}
+
+	current := c.FormValue("current_password")
+	newPass := c.FormValue("new_password")
+	confirm := c.FormValue("confirm_password")
+
+	admins, _ := h.admins.All()
+	render := func(errMsg string, changed bool) error {
+		return c.Render(http.StatusOK, "admins.html", map[string]interface{}{
+			"Admins":          admins,
+			"Error":           errMsg,
+			"Created":         false,
+			"PasswordChanged": changed,
+			"SelfID":          selfID,
+		})
+	}
+
+	if bcrypt.CompareHashAndPassword([]byte(admin.PasswordHash), []byte(current)) != nil {
+		return render("Current password is incorrect.", false)
+	}
+	if len(newPass) < 8 {
+		return render("New password must be at least 8 characters.", false)
+	}
+	if newPass != confirm {
+		return render("New passwords do not match.", false)
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPass), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	if err := h.admins.UpdatePassword(selfID, string(hash)); err != nil {
+		return err
+	}
+	return render("", true)
+}

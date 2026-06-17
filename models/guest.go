@@ -135,48 +135,24 @@ func (s *GuestStore) Delete(id string) error {
 }
 
 type Stats struct {
-	Added      int
-	Invited    int
-	Accepted   int
-	Declined   int
-	Tentative  int
-	NoResponse int // computed: guests without an RSVP (added + invited)
-	TotalHeads int // guests + plus ones + children
+	Invited    int `db:"invited"`     // all guests except status added
+	Accepted   int `db:"accepted"`    // accepted only
+	NoResponse int `db:"no_response"` // status invited
+	TotalHeads int `db:"total_heads"` // accepted guests + plus ones + children
+	Children   int `db:"children"`    // children count among accepted
 }
 
 func (s *GuestStore) Stats() (Stats, error) {
-	rows, err := s.db.Queryx(`
-		SELECT status, COUNT(*) as n,
-		       SUM(plus_one) as po, SUM(children) as ch
-		FROM guests GROUP BY status`)
-	if err != nil {
-		return Stats{}, err
-	}
-	defer rows.Close()
-
 	var st Stats
-	for rows.Next() {
-		var status string
-		var n, po, ch int
-		if err := rows.Scan(&status, &n, &po, &ch); err != nil {
-			return Stats{}, err
-		}
-		st.TotalHeads += n + po + ch
-		switch status {
-		case "added":
-			st.Added = n
-		case "invited":
-			st.Invited = n
-		case "accepted":
-			st.Accepted = n
-		case "declined":
-			st.Declined = n
-		case "tentative":
-			st.Tentative = n
-		}
-	}
-	st.NoResponse = st.Added + st.Invited
-	return st, nil
+	err := s.db.Get(&st, `
+		SELECT
+			COALESCE(SUM(CASE WHEN status != 'added' THEN 1 ELSE 0 END), 0) AS invited,
+			COALESCE(SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END), 0) AS accepted,
+			COALESCE(SUM(CASE WHEN status = 'invited' THEN 1 ELSE 0 END), 0) AS no_response,
+			COALESCE(SUM(CASE WHEN status = 'accepted' THEN 1 + plus_one + children ELSE 0 END), 0) AS total_heads,
+			COALESCE(SUM(CASE WHEN status = 'accepted' THEN children ELSE 0 END), 0) AS children
+		FROM guests`)
+	return st, err
 }
 
 func (s *GuestStore) NewsletterRecipients() ([]Guest, error) {

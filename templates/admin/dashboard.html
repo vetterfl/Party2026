@@ -22,10 +22,6 @@
 
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-value" style="color:var(--text-muted)">{{.Stats.Added}}</div>
-      <div class="stat-label">Added</div>
-    </div>
-    <div class="stat-card">
       <div class="stat-value" style="color:#7ab3f0">{{.Stats.Invited}}</div>
       <div class="stat-label">Invited</div>
     </div>
@@ -34,20 +30,16 @@
       <div class="stat-label">Accepted</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value" style="color:#ff4d6d">{{.Stats.Declined}}</div>
-      <div class="stat-label">Declined</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value warn">{{.Stats.Tentative}}</div>
-      <div class="stat-label">Tentative</div>
-    </div>
-    <div class="stat-card">
       <div class="stat-value" style="color:var(--text-dim)">{{.Stats.NoResponse}}</div>
       <div class="stat-label">No Response</div>
     </div>
     <div class="stat-card">
       <div class="stat-value">{{.Stats.TotalHeads}}</div>
       <div class="stat-label">Total Heads</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value warn">{{.Stats.Children}}</div>
+      <div class="stat-label">Children</div>
     </div>
   </div>
 

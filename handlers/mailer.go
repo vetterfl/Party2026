@@ -114,6 +114,34 @@ func (m *Mailer) SendNewsletter(recipients []models.Guest, subject, bodyMD strin
 	return nil
 }
 
+func (m *Mailer) SendNewsletterTest(to, subject, bodyMD string, cfg map[string]string) error {
+	to = strings.TrimSpace(to)
+	if to == "" {
+		return fmt.Errorf("no admin email configured — set RSVP Notification Email in Site Config")
+	}
+
+	testGuest := models.Guest{
+		ID:       "00000000-0000-0000-0000-000000000000",
+		Name:     "Test Guest",
+		Nickname: "Test Guest",
+	}
+	personalSubject := personalizeNewsletterText(subject, testGuest)
+	bodyHTML, err := renderNewsletterMarkdown(personalizeNewsletterText(bodyMD, testGuest))
+	if err != nil {
+		return err
+	}
+
+	html := `<p style="font-size:12px;color:#664d03;background:#fff3cd;padding:0.75rem 1rem;border-radius:4px;margin:0 0 1.25rem">
+	<strong>Test email</strong> — preview only, not sent to newsletter recipients. <code>{name}</code> was replaced with &ldquo;Test Guest&rdquo;.
+	</p>` + wrapNewsletterHTML(bodyHTML) + fmt.Sprintf(
+		`<p style="font-size:11px;color:#666;margin-top:1.5rem">
+		<a href="%s/unsubscribe?token=%s" style="color:#008a6b">Abmelden / Unsubscribe</a> (sample link)</p>`,
+		m.baseURL, m.UnsubToken(testGuest.ID),
+	)
+
+	return sendMail(to, "[Test] "+personalSubject, html, cfg)
+}
+
 func personalizeNewsletterText(text string, g models.Guest) string {
 	text = strings.ReplaceAll(text, "{name}", g.DisplayName())
 	return text

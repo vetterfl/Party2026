@@ -15,24 +15,42 @@
   <div class="alert alert-success">Newsletter sent to {{.RecipientCount}} recipients.</div>
   {{end}}
 
+  {{if .TestSent}}
+  <div class="alert alert-success">Test email sent{{if .AdminEmail}} to {{.AdminEmail}}{{end}}.</div>
+  {{end}}
+
   {{if .Error}}
   <div class="alert alert-error">Send error: {{.Error}}</div>
+  {{end}}
+
+  {{if .TestError}}
+  <div class="alert alert-error">Test send error: {{.TestError}}</div>
   {{end}}
 
   <form class="admin-form wide" method="POST" action="/admin/newsletter">
     {{template "_csrf" $}}
     <div class="field">
       <label for="subject">Subject</label>
-      <input type="text" id="subject" name="subject" placeholder="Hi {name} — Summer Party Update…" required>
+      <input type="text" id="subject" name="subject" value="{{.Subject}}" placeholder="Hi {name} — Summer Party Update…" required>
     </div>
 
     <div class="field">
       <label for="body">Body (Markdown)</label>
-      <textarea class="newsletter-body" id="body" name="body" placeholder="# Update&#10;&#10;Hi {name}, …" required></textarea>
+      <textarea class="newsletter-body" id="body" name="body" placeholder="# Update&#10;&#10;Hi {name}, …" required>{{.Body}}</textarea>
       <span class="form-hint">Markdown is rendered to HTML. Use <code>{name}</code> for the recipient's name (also works in the subject). An unsubscribe link is added automatically.</span>
     </div>
 
-    <div class="form-actions">
+    <div class="form-actions" style="flex-wrap:wrap;gap:0.5rem">
+      {{if .AdminEmail}}
+      <button type="submit" formaction="/admin/newsletter/test" formmethod="POST" class="btn btn-outline">
+        Send test to {{.AdminEmail}}
+      </button>
+      {{else}}
+      <button type="button" class="btn btn-outline" disabled title="Set RSVP Notification Email in Site Config first">
+        Send test email
+      </button>
+      <span class="form-hint" style="margin:0">Set <strong>RSVP Notification Email</strong> in Site Config to enable test sends.</span>
+      {{end}}
       <button type="submit" class="btn btn-primary"
         data-confirm="Send newsletter to {{.RecipientCount}} recipients?">
         Send to {{.RecipientCount}} recipients

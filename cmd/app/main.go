@@ -140,6 +140,7 @@ func main() {
 	admin.POST("/content/:key", ch.Save)
 	admin.GET("/newsletter", nh.Page)
 	admin.POST("/newsletter", nh.Send)
+	admin.POST("/newsletter/test", nh.SendTest)
 	admin.GET("/config", cfgh.Page)
 	admin.POST("/config", cfgh.Save)
 	admin.GET("/admins", auh.List)

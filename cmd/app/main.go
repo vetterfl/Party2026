@@ -41,6 +41,7 @@ func main() {
 	configStore := models.NewConfigStore(db)
 	contentStore := models.NewContentStore(db)
 	adminStore := models.NewAdminStore(db)
+	carpoolStore := models.NewCarpoolStore(db)
 
 	bootstrapAdmin(adminStore)
 
@@ -100,6 +101,7 @@ func main() {
 	nh := handlers.NewNewsletterHandler(guestStore, configStore, mailer)
 	cfgh := handlers.NewConfigHandler(configStore, themes)
 	auh := handlers.NewAdminUsersHandler(adminStore)
+	cph := handlers.NewCarpoolHandler(guestStore, configStore, contentStore, carpoolStore)
 
 	loginRL := loginRateLimiter()
 
@@ -117,6 +119,9 @@ func main() {
 	me.POST("/rsvp", gh.RSVPSubmit)
 	me.GET("/confirmed", gh.Confirmed)
 	me.GET("/calendar.ics", gh.CalendarICS)
+	me.GET("/carpool", cph.Board)
+	me.POST("/carpool", cph.Create)
+	me.POST("/carpool/:id/delete", cph.Delete)
 
 	// Admin routes
 	e.GET("/admin/login", ah.LoginPage)

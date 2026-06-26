@@ -1,0 +1,125 @@
+{{template "_head_guest" .}}
+<body class="rsvp-page">
+{{template "_pool_bg" .}}
+{{template "_nav_guest" .}}
+
+<main class="rsvp-container">
+  <h1 class="rsvp-page-title">{{t .Base.Lang "carpool.title"}}</h1>
+  <p class="rsvp-page-subtitle">{{t .Base.Lang "carpool.intro"}}</p>
+
+  {{/* Board */}}
+  <h2 class="rsvp-page-title" style="font-size:1.5rem;margin-top:2rem">{{t .Base.Lang "carpool.board_title"}}</h2>
+
+  {{if .Posts}}
+  <div class="carpool-list" style="display:flex;flex-direction:column;gap:1rem;margin-top:1rem">
+    {{range .Posts}}
+    <div class="content-card carpool-card" style="text-align:left">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap">
+        <span class="rsvp-status-badge {{if .IsOffer}}accepted{{else}}invited{{end}}">
+          {{if .IsOffer}}🚗 {{t $.Base.Lang "carpool.offer_badge"}}{{else}}🙋 {{t $.Base.Lang "carpool.request_badge"}}{{end}}
+        </span>
+        <strong>{{.AuthorName}}</strong>
+      </div>
+
+      <dl style="margin:0.75rem 0 0;display:grid;grid-template-columns:auto 1fr;gap:0.35rem 0.75rem">
+        {{if .Origin}}
+        <dt style="opacity:0.7">{{t $.Base.Lang "carpool.origin"}}</dt>
+        <dd style="margin:0">{{.Origin}}</dd>
+        {{end}}
+        {{if .TravelTime}}
+        <dt style="opacity:0.7">{{t $.Base.Lang "carpool.time"}}</dt>
+        <dd style="margin:0">{{.TravelTime}}</dd>
+        {{end}}
+        {{if and .IsOffer (gt .Seats 0)}}
+        <dt style="opacity:0.7">{{t $.Base.Lang "carpool.seats"}}</dt>
+        <dd style="margin:0">{{.Seats}}</dd>
+        {{end}}
+        <dt style="opacity:0.7">{{t $.Base.Lang "carpool.contact"}}</dt>
+        <dd style="margin:0">{{.Contact}}</dd>
+      </dl>
+
+      {{if .Note}}
+      <p style="margin:0.75rem 0 0;white-space:pre-wrap">{{.Note}}</p>
+      {{end}}
+
+      {{if eq .GuestID $.Base.Guest.ID}}
+      <form method="POST" action="/me/carpool/{{.ID}}/delete" style="margin-top:0.75rem"
+        onsubmit="return confirm('{{t $.Base.Lang "carpool.delete_confirm"}}');">
+        {{template "_csrf" $}}
+        <button type="submit" class="btn btn-ghost" style="font-size:0.85rem">🗑 {{t $.Base.Lang "carpool.delete"}}</button>
+      </form>
+      {{end}}
+    </div>
+    {{end}}
+  </div>
+  {{else}}
+  <p style="text-align:center;opacity:0.75;margin-top:1rem">{{t .Base.Lang "carpool.empty"}}</p>
+  {{end}}
+
+  {{/* Add a post */}}
+  <h2 class="rsvp-page-title" style="font-size:1.5rem;margin-top:2.5rem">{{t .Base.Lang "carpool.add_title"}}</h2>
+  <form class="form-card" method="POST" action="/me/carpool">
+    {{template "_csrf" $}}
+
+    <div class="form-field">
+      <span class="form-label">{{t .Base.Lang "carpool.kind"}}</span>
+      <div class="radio-group">
+        <div class="radio-tile">
+          <input type="radio" name="kind" id="kind-offer" value="offer" checked>
+          <label class="radio-tile-label" for="kind-offer">🚗 {{t .Base.Lang "carpool.kind_offer"}}</label>
+        </div>
+        <div class="radio-tile">
+          <input type="radio" name="kind" id="kind-request" value="request">
+          <label class="radio-tile-label" for="kind-request">🙋 {{t .Base.Lang "carpool.kind_request"}}</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="carpool-origin">{{t .Base.Lang "carpool.origin"}}</label>
+      <input class="form-input" type="text" id="carpool-origin" name="origin"
+        placeholder="{{t .Base.Lang "carpool.origin_ph"}}">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="carpool-time">{{t .Base.Lang "carpool.time"}}</label>
+      <input class="form-input" type="text" id="carpool-time" name="travel_time"
+        placeholder="{{t .Base.Lang "carpool.time_ph"}}">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="carpool-seats">{{t .Base.Lang "carpool.seats"}}</label>
+      <input class="form-input" type="number" id="carpool-seats" name="seats"
+        min="0" max="99" inputmode="numeric" style="max-width:200px"
+        placeholder="0">
+      <span class="form-hint">{{t .Base.Lang "carpool.seats_hint"}}</span>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="carpool-note">{{t .Base.Lang "carpool.note"}}</label>
+      <textarea class="form-textarea" id="carpool-note" name="note"
+        placeholder="{{t .Base.Lang "carpool.note_ph"}}"></textarea>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="carpool-contact">{{t .Base.Lang "carpool.contact"}}</label>
+      <input class="form-input" type="text" id="carpool-contact" name="contact" required
+        placeholder="{{t .Base.Lang "carpool.contact_ph"}}">
+      <span class="form-hint">{{t .Base.Lang "carpool.contact_hint"}}</span>
+    </div>
+
+    <div class="form-footer">
+      <button type="submit" class="btn btn-primary">{{t .Base.Lang "carpool.submit"}}</button>
+    </div>
+  </form>
+
+  <div style="text-align:center;margin-top:1.5rem">
+    <a href="/me" class="btn btn-ghost">← {{if eq .Base.Lang "en"}}Back{{else}}Zurück{{end}}</a>
+  </div>
+
+  {{template "_footer_guest" .}}
+</main>
+
+{{template "_scripts_guest" .}}
+</body>
+</html>

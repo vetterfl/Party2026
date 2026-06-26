@@ -50,6 +50,12 @@
     {{end}}
   </section>
 
+  {{/* Carpool board */}}
+  <section class="carpool-cta" style="text-align:center;margin-top:2rem">
+    <p class="rsvp-note reveal">{{t .Base.Lang "carpool.cta_note"}}</p>
+    <a href="/me/carpool" class="btn btn-outline">🚗 {{t .Base.Lang "carpool.title"}}</a>
+  </section>
+
   {{template "_footer_guest" .}}
 </main>
 

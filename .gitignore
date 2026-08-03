@@ -31,3 +31,9 @@ notes.txt
 .DS_Store
 .idea/
 .vscode/
+
+# Backup files
+backup/
+
+# Party photos (mounted as a volume, never baked into the image or git)
+photos/

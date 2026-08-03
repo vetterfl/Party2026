@@ -102,6 +102,7 @@ func main() {
 	cfgh := handlers.NewConfigHandler(configStore, themes)
 	auh := handlers.NewAdminUsersHandler(adminStore)
 	cph := handlers.NewCarpoolHandler(guestStore, configStore, contentStore, carpoolStore)
+	glh := handlers.NewGalleryHandler(guestStore, configStore, contentStore)
 
 	loginRL := loginRateLimiter()
 
@@ -122,6 +123,8 @@ func main() {
 	me.GET("/carpool", cph.Board)
 	me.POST("/carpool", cph.Create)
 	me.POST("/carpool/:id/delete", cph.Delete)
+	me.GET("/gallery", glh.Gallery)
+	me.GET("/gallery/img/:name", glh.Serve)
 
 	// Admin routes
 	e.GET("/admin/login", ah.LoginPage)

@@ -1,0 +1,186 @@
+{{template "_head_guest" .}}
+<body class="rsvp-page gallery-page">
+{{template "_pool_bg" .}}
+{{template "_nav_guest" .}}
+
+<style>
+  .gallery-container { max-width: 1100px; margin: 0 auto; padding: 0 1rem 3rem; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.85rem; }
+  }
+  .gallery-tile {
+    position: relative;
+    display: block;
+    aspect-ratio: 1 / 1;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .gallery-tile:hover, .gallery-tile:focus-visible {
+    transform: translateY(-3px) scale(1.015);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+    outline: none;
+  }
+  .gallery-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gallery-empty { text-align: center; opacity: 0.75; margin-top: 2rem; }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 12, 24, 0.92);
+    backdrop-filter: blur(6px);
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 92vw;
+    max-height: 86vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    animation: lb-in 0.2s ease;
+  }
+  @keyframes lb-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+  .lb-btn {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+    user-select: none;
+  }
+  .lb-btn:hover { background: rgba(255, 255, 255, 0.26); }
+  .lb-close { top: 1rem; right: 1rem; }
+  .lb-prev { left: 1rem; top: 50%; transform: translateY(-50%); }
+  .lb-next { right: 1rem; top: 50%; transform: translateY(-50%); }
+  .lb-counter {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    letter-spacing: 0.03em;
+  }
+  @media (max-width: 640px) {
+    .lb-prev { left: 0.4rem; }
+    .lb-next { right: 0.4rem; }
+    .lb-btn { width: 46px; height: 46px; }
+  }
+</style>
+
+<main class="gallery-container">
+  <h1 class="rsvp-page-title">{{t .Base.Lang "gallery.title"}}</h1>
+  <p class="rsvp-page-subtitle">{{t .Base.Lang "gallery.intro"}}</p>
+
+  {{if .Photos}}
+  <div class="gallery-grid" id="gallery-grid">
+    {{range $i, $p := .Photos}}
+    <button type="button" class="gallery-tile" data-index="{{$i}}"
+      data-full="/me/gallery/img/{{$p.Full}}"
+      aria-label="{{t $.Base.Lang "gallery.view"}} {{add $i 1}}">
+      <img src="/me/gallery/img/{{$p.Thumb}}" loading="lazy" alt="">
+    </button>
+    {{end}}
+  </div>
+  {{else}}
+  <p class="gallery-empty">{{t .Base.Lang "gallery.empty"}}</p>
+  {{end}}
+
+  <div style="text-align:center;margin-top:2rem">
+    <a href="/me" class="btn btn-ghost">← {{if eq .Base.Lang "en"}}Back{{else}}Zurück{{end}}</a>
+  </div>
+
+  {{template "_footer_guest" .}}
+</main>
+
+{{if .Photos}}
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
+  <button type="button" class="lb-btn lb-close" id="lb-close" aria-label="{{t .Base.Lang "gallery.close"}}">×</button>
+  <button type="button" class="lb-btn lb-prev" id="lb-prev" aria-label="{{t .Base.Lang "gallery.prev"}}">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button type="button" class="lb-btn lb-next" id="lb-next" aria-label="{{t .Base.Lang "gallery.next"}}">›</button>
+  <div class="lb-counter" id="lb-counter"></div>
+</div>
+
+<script>
+(function () {
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.gallery-tile'));
+  var urls = tiles.map(function (t) { return t.getAttribute('data-full'); });
+  var box = document.getElementById('lightbox');
+  var img = document.getElementById('lb-img');
+  var counter = document.getElementById('lb-counter');
+  var current = 0;
+
+  function show(i) {
+    current = (i + urls.length) % urls.length;
+    img.src = urls[current];
+    counter.textContent = (current + 1) + ' / ' + urls.length;
+  }
+  function open(i) {
+    show(i);
+    box.classList.add('open');
+    box.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    // Preload neighbours for snappy navigation.
+    [current + 1, current - 1].forEach(function (n) {
+      var p = new Image();
+      p.src = urls[(n + urls.length) % urls.length];
+    });
+  }
+  function close() {
+    box.classList.remove('open');
+    box.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    img.src = '';
+  }
+
+  tiles.forEach(function (t) {
+    t.addEventListener('click', function () { open(parseInt(t.getAttribute('data-index'), 10)); });
+  });
+  document.getElementById('lb-close').addEventListener('click', close);
+  document.getElementById('lb-next').addEventListener('click', function (e) { e.stopPropagation(); show(current + 1); });
+  document.getElementById('lb-prev').addEventListener('click', function (e) { e.stopPropagation(); show(current - 1); });
+  box.addEventListener('click', function (e) { if (e.target === box) close(); });
+  document.addEventListener('keydown', function (e) {
+    if (!box.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowRight') show(current + 1);
+    else if (e.key === 'ArrowLeft') show(current - 1);
+  });
+})();
+</script>
+{{end}}
+
+{{template "_scripts_guest" .}}
+</body>
+</html>

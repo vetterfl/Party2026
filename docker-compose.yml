@@ -5,6 +5,7 @@ services:
     env_file: .env
     volumes:
       - ./data:/app/data
+      - ./photos:/app/photos:ro
     expose:
       - "3000"
     depends_on: []

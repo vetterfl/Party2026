@@ -62,6 +62,15 @@ var DE = map[string]string{
 	"carpool.empty":          "Noch keine Einträge. Sei die erste Person!",
 	"carpool.delete":         "Löschen",
 	"carpool.delete_confirm": "Diesen Eintrag wirklich löschen?",
+
+	"gallery.title": "Party-Fotos",
+	"gallery.intro": "Erinnerungen an einen schönen Tag. Tippe auf ein Bild, um es groß zu sehen.",
+	"gallery.cta":   "Schau dir die Party-Fotos an.",
+	"gallery.empty": "Noch keine Fotos hochgeladen.",
+	"gallery.view":  "Foto",
+	"gallery.close": "Schließen",
+	"gallery.prev":  "Vorheriges",
+	"gallery.next":  "Nächstes",
 }
 
 var EN = map[string]string{
@@ -126,6 +135,15 @@ var EN = map[string]string{
 	"carpool.empty":          "No entries yet. Be the first!",
 	"carpool.delete":         "Delete",
 	"carpool.delete_confirm": "Really delete this entry?",
+
+	"gallery.title": "Party photos",
+	"gallery.intro": "Memories from a lovely day. Tap a picture to view it large.",
+	"gallery.cta":   "Take a look at the party photos.",
+	"gallery.empty": "No photos uploaded yet.",
+	"gallery.view":  "Photo",
+	"gallery.close": "Close",
+	"gallery.prev":  "Previous",
+	"gallery.next":  "Next",
 }
 
 func T(lang string, key string) string {

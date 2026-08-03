@@ -25,12 +25,16 @@ themes, and newsletter through an admin UI.
 | RSVP | Accept/decline, plus-one + name, kids count, favourite song, comment, email + newsletter opt-in. |
 | Confirmation email | Sent on RSVP submission. Includes recap and links to update RSVP / unsubscribe. |
 | Calendar export | Optional `/me/calendar.ics` download for guests who accepted. |
+| Carpool board | Guest message board (`/me/carpool`) to offer and find rides. |
+| Photo gallery | After-party gallery (`/me/gallery`): thumbnail grid + one-click lightbox, served from a volume-mounted photos directory. |
+| Feature toggles | RSVP, carpool board, and photo gallery can each be switched on/off in Admin → Config. Default on. |
 | Themes | Multiple visual themes shipped under `assets/themes/<name>/`. Admin selects per page. |
 | Content blocks | Markdown blocks edited in admin, rendered into guest pages. |
 | Admin dashboard | Headcount stats, days-until-party, quick links. |
 | Guest management | CRUD, status filters, CSV export, printable invite cards (A6 ticket), QR codes, WhatsApp/Signal share-message helpers. |
-| Newsletter | Bulk send to opted-in guests with Markdown body, per-recipient `{name}` placeholder, automatic unsubscribe link. |
-| Multi-admin | Multiple admin accounts via UI, with self-deletion / last-admin safeguards. |
+| Playlist + messages | Admin views of guest song requests and the carpool board. |
+| Newsletter | Bulk send to opted-in guests with Markdown body, per-recipient `{name}` placeholder, automatic unsubscribe link. Test-send to the admin email. |
+| Multi-admin | Multiple admin accounts via UI, with self-deletion / last-admin safeguards, and self-service password change. |
 
 ## Quick start (development)
 
@@ -40,7 +44,7 @@ Requires **Go 1.23+** (CGO enabled for sqlite — needs a C toolchain).
 cp .env.example .env
 # Edit .env: set SESSION_SECRET, BASE_URL, ADMIN_USER, ADMIN_PASSWORD
 
-mkdir -p data
+mkdir -p data photos
 go run ./cmd/app
 ```
 
@@ -58,8 +62,14 @@ restart.
 docker compose up -d
 ```
 
-The compose file builds the app, mounts `./data` for the SQLite database, and
-serves through nginx on ports 80/443.
+The compose file builds the app, mounts `./data` for the SQLite database and
+`./photos` (read-only) for the gallery, and serves through nginx on ports
+80/443.
+
+Photos are **not** baked into the image or committed to git — drop the
+gallery's image files into `./photos` on the host (each as `<id>.jpg` plus an
+optional `<id>_thumb.jpg` thumbnail). The directory is scanned at startup, so
+restart the app container after adding or changing photos.
 
 Before going live:
 - Edit `nginx.conf` — replace `party.example.com` with your real hostname (in
@@ -76,6 +86,7 @@ Before going live:
 |-----|----------|---------|-------------|
 | `PORT` | no | `3000` | App listen port |
 | `DATABASE_PATH` | no | `./data/party.db` | SQLite file path |
+| `PHOTOS_DIR` | no | `./photos` | Directory the photo gallery serves images from (scanned once at startup) |
 | `SESSION_SECRET` | **yes in production** | — | ≥32 random bytes hex. Generate with `openssl rand -hex 32`. Also used to sign unsubscribe tokens. |
 | `BASE_URL` | yes | `http://localhost:$PORT` | Public origin. Used in invite links, QR codes, emails. |
 | `GO_ENV` | no | unset | Set to `production` to enable Secure cookies and the session-secret guard. |
@@ -131,14 +142,18 @@ folder with the two files and restarting.
 
 ## Content blocks
 
-Three Markdown blocks live in the `content_blocks` table and are edited via
-Admin → Content:
+Markdown blocks live in the `content_blocks` table and are edited via
+Admin → Content (each with a German + English body):
 
 - `general` — main page body (the long text on `/me`)
 - `rsvp_note` — note shown above the RSVP CTA
-- `confirmation_message` — message shown on the confirmed page
+- `confirmation_message_accepted` / `confirmation_message_declined` — messages on the confirmed page
+- `gallery_intro` — subtitle on the photo gallery page
+- `footer_note` — text in the site footer
+- `privacy` — privacy policy page body
 
-Markdown is rendered with goldmark.
+Markdown is rendered with goldmark. New blocks are seeded by migrations, so
+the list grows as features are added.
 
 ## Admin: multi-admin accounts
 
@@ -194,5 +209,4 @@ assets/                 static files: css, js, fonts, themes
 
 ## License
 
-Personal project — no license declared. Treat as "all rights reserved" unless
-the repo owner says otherwise.
+Released under the [MIT License](LICENSE) © 2026 Florian Vetter.

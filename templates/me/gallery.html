@@ -100,7 +100,11 @@
 
 <main class="gallery-container">
   <h1 class="rsvp-page-title">{{t .Base.Lang "gallery.title"}}</h1>
+  {{with content .Base.Content "gallery_intro" .Base.Lang}}
+  <div class="rsvp-page-subtitle content-body">{{.}}</div>
+  {{else}}
   <p class="rsvp-page-subtitle">{{t .Base.Lang "gallery.intro"}}</p>
+  {{end}}
 
   {{if .Photos}}
   <div class="gallery-grid" id="gallery-grid">

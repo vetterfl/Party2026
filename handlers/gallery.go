@@ -112,8 +112,20 @@ func (h *GalleryHandler) loadBase(c echo.Context, g *models.Guest) (BaseData, er
 	return newBase(c, cfg, cm, g, theme), nil
 }
 
+// enabled reports whether the gallery feature is switched on in config.
+func (h *GalleryHandler) enabled() bool {
+	cfg, err := h.config.All()
+	if err != nil {
+		return true // fail open — config read errors shouldn't hide the feature
+	}
+	return galleryEnabled(cfg)
+}
+
 // GET /me/gallery — after-party photo gallery
 func (h *GalleryHandler) Gallery(c echo.Context) error {
+	if !h.enabled() {
+		return echo.ErrNotFound
+	}
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
 	if err != nil {
 		_ = middleware.ClearGuestSession(c)
@@ -140,6 +152,9 @@ func (h *GalleryHandler) Gallery(c echo.Context) error {
 // The name is validated against the on-disk allow-list, so path traversal and
 // requests for arbitrary files are rejected.
 func (h *GalleryHandler) Serve(c echo.Context) error {
+	if !h.enabled() {
+		return echo.ErrNotFound
+	}
 	name := c.Param("name")
 	if !photoNameRe.MatchString(name) {
 		return echo.ErrNotFound

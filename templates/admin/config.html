@@ -102,6 +102,24 @@
     <div style="height:1px;background:var(--border)"></div>
 
     <div class="field">
+      <label class="form-check" style="flex-direction:row;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;font-weight:500;color:var(--text)">
+        <input type="checkbox" name="carpool_enabled" value="1"{{if featureOn .Config "carpool_enabled"}} checked{{end}}>
+        Enable carpool board (Mitfahrbörse)
+      </label>
+      <span class="form-hint">Guest message board at /me/carpool to offer and find rides. Shows a link on the guest page.</span>
+    </div>
+
+    <div class="field">
+      <label class="form-check" style="flex-direction:row;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;font-weight:500;color:var(--text)">
+        <input type="checkbox" name="gallery_enabled" value="1"{{if featureOn .Config "gallery_enabled"}} checked{{end}}>
+        Enable after-party photo gallery
+      </label>
+      <span class="form-hint">Photo gallery at /me/gallery, served from the mounted photos volume. Shows a link on the guest page.</span>
+    </div>
+
+    <div style="height:1px;background:var(--border)"></div>
+
+    <div class="field">
       <label for="hero_image_url">Hero Background Image URL</label>
       <input type="url" id="hero_image_url" name="hero_image_url" value="{{index .Config "hero_image_url"}}" placeholder="https://…">
       <span class="form-hint">Full-width jumbo image on the guest invite page (/me). HTTPS URL to a JPG, PNG, or WebP. Leave empty for gradient only.</span>

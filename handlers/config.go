@@ -56,6 +56,15 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 		_ = h.config.Set(k, c.FormValue(k))
 	}
 
+	// Feature toggles (default ON) — persist explicit 1/0 from checkboxes.
+	for _, k := range []string{"gallery_enabled", "carpool_enabled"} {
+		if c.FormValue(k) == "1" {
+			_ = h.config.Set(k, "1")
+		} else {
+			_ = h.config.Set(k, "0")
+		}
+	}
+
 	_ = h.config.Set("hero_image_url", sanitizeImageURL(c.FormValue("hero_image_url")))
 	_ = h.config.Set("rsvp_notify_email", strings.TrimSpace(c.FormValue("rsvp_notify_email")))
 

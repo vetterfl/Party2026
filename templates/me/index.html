@@ -51,16 +51,20 @@
   </section>
 
   {{/* Carpool board */}}
+  {{if featureOn .Base.Config "carpool_enabled"}}
   <section class="carpool-cta" style="text-align:center;margin-top:2rem">
     <p class="rsvp-note reveal">{{t .Base.Lang "carpool.cta_note"}}</p>
     <a href="/me/carpool" class="btn btn-outline">🚗 {{t .Base.Lang "carpool.title"}}</a>
   </section>
+  {{end}}
 
   {{/* Photo gallery */}}
+  {{if featureOn .Base.Config "gallery_enabled"}}
   <section class="gallery-cta" style="text-align:center;margin-top:2rem">
     <p class="rsvp-note reveal">{{t .Base.Lang "gallery.cta"}}</p>
     <a href="/me/gallery" class="btn btn-outline">📸 {{t .Base.Lang "gallery.title"}}</a>
   </section>
+  {{end}}
 
   {{template "_footer_guest" .}}
 </main>

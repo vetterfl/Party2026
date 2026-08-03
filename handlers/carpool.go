@@ -41,8 +41,20 @@ func (h *CarpoolHandler) loadBase(c echo.Context, g *models.Guest) (BaseData, er
 	return newBase(c, cfg, cm, g, theme), nil
 }
 
+// enabled reports whether the carpool feature is switched on in config.
+func (h *CarpoolHandler) enabled() bool {
+	cfg, err := h.config.All()
+	if err != nil {
+		return true // fail open — config read errors shouldn't hide the feature
+	}
+	return carpoolEnabled(cfg)
+}
+
 // GET /me/carpool — carpool message board
 func (h *CarpoolHandler) Board(c echo.Context) error {
+	if !h.enabled() {
+		return echo.ErrNotFound
+	}
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
 	if err != nil {
 		_ = middleware.ClearGuestSession(c)
@@ -68,6 +80,9 @@ func (h *CarpoolHandler) Board(c echo.Context) error {
 
 // POST /me/carpool — create a carpool post for the current guest
 func (h *CarpoolHandler) Create(c echo.Context) error {
+	if !h.enabled() {
+		return echo.ErrNotFound
+	}
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")
@@ -113,6 +128,9 @@ func (h *CarpoolHandler) Create(c echo.Context) error {
 
 // POST /me/carpool/:id/delete — delete one of the current guest's posts
 func (h *CarpoolHandler) Delete(c echo.Context) error {
+	if !h.enabled() {
+		return echo.ErrNotFound
+	}
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")

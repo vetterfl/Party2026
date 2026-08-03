@@ -57,7 +57,7 @@ func (h *ConfigHandler) Save(c echo.Context) error {
 	}
 
 	// Feature toggles (default ON) — persist explicit 1/0 from checkboxes.
-	for _, k := range []string{"gallery_enabled", "carpool_enabled"} {
+	for _, k := range []string{"gallery_enabled", "carpool_enabled", "rsvp_enabled"} {
 		if c.FormValue(k) == "1" {
 			_ = h.config.Set(k, "1")
 		} else {

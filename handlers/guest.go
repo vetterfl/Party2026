@@ -124,8 +124,20 @@ func (h *GuestHandler) Me(c echo.Context) error {
 	return c.Render(http.StatusOK, "index.html", map[string]interface{}{"Base": bd})
 }
 
+// rsvpOn reports whether the RSVP feature is enabled in config.
+func (h *GuestHandler) rsvpOn() bool {
+	cfg, err := h.config.All()
+	if err != nil {
+		return true // fail open — config read errors shouldn't hide the feature
+	}
+	return rsvpEnabled(cfg)
+}
+
 // GET /me/rsvp — RSVP form prefilled
 func (h *GuestHandler) RSVPForm(c echo.Context) error {
+	if !h.rsvpOn() {
+		return echo.ErrNotFound
+	}
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")
@@ -140,6 +152,9 @@ func (h *GuestHandler) RSVPForm(c echo.Context) error {
 
 // POST /me/rsvp — submit RSVP
 func (h *GuestHandler) RSVPSubmit(c echo.Context) error {
+	if !h.rsvpOn() {
+		return echo.ErrNotFound
+	}
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")
@@ -211,6 +226,9 @@ func (h *GuestHandler) RSVPSubmit(c echo.Context) error {
 
 // GET /me/confirmed
 func (h *GuestHandler) Confirmed(c echo.Context) error {
+	if !h.rsvpOn() {
+		return echo.ErrNotFound
+	}
 	guest, err := h.guests.FindByID(middleware.GetGuestID(c))
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/")

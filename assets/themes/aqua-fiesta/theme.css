@@ -718,12 +718,24 @@ body::before {
 
 /* ── RSVP Section ───────────────────────────────────────────── */
 .rsvp-section {
-  padding: 3rem 2rem 9rem;
+  padding: 3rem 2rem 3rem;
   max-width: 1100px;
   margin: 0 auto;
   text-align: center;
   opacity: 0;
   transform: translateY(22px);
+}
+
+/* Optional call-to-action tiles (carpool, gallery). A flex gap spaces the
+   tiles, so hiding one of them never leaves an empty gap behind. */
+.me-ctas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 3rem;
 }
 .rsvp-section.revealed {
   opacity: 1;

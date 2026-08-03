@@ -103,6 +103,14 @@
 
     <div class="field">
       <label class="form-check" style="flex-direction:row;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;font-weight:500;color:var(--text)">
+        <input type="checkbox" name="rsvp_enabled" value="1"{{if featureOn .Config "rsvp_enabled"}} checked{{end}}>
+        Enable RSVP
+      </label>
+      <span class="form-hint">RSVP form and confirmation at /me/rsvp. When off, the RSVP block is hidden on the guest page.</span>
+    </div>
+
+    <div class="field">
+      <label class="form-check" style="flex-direction:row;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;font-weight:500;color:var(--text)">
         <input type="checkbox" name="carpool_enabled" value="1"{{if featureOn .Config "carpool_enabled"}} checked{{end}}>
         Enable carpool board (Mitfahrbörse)
       </label>

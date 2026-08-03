@@ -16,3 +16,4 @@ func featureEnabled(cfg map[string]string, key string) bool {
 
 func galleryEnabled(cfg map[string]string) bool { return featureEnabled(cfg, "gallery_enabled") }
 func carpoolEnabled(cfg map[string]string) bool { return featureEnabled(cfg, "carpool_enabled") }
+func rsvpEnabled(cfg map[string]string) bool    { return featureEnabled(cfg, "rsvp_enabled") }
